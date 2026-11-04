@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mini Farm Island 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#263b4d;--muted:#82909a;--green:#12bf68;--gold:#ffc928;--glass:rgba(255,255,255,.9);--line:rgba(65,91,108,.15)}
+  *{box-sizing:border-box}html,body{width:100%;height:100%;margin:0;overflow:hidden;font-family:'Kanit',sans-serif;color:var(--ink);background:#75cbed;user-select:none}
+  #game{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none}
+  .panel{position:fixed;z-index:5;background:var(--glass);border:1px solid rgba(255,255,255,.7);border-radius:17px;box-shadow:0 12px 35px rgba(22,67,89,.13);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
+  #hud{left:16px;top:16px;width:220px;padding:13px}
+  .brand{display:flex;align-items:center;gap:7px;font-size:16px;font-weight:700;letter-spacing:.1px;margin:1px 3px 11px;white-space:nowrap}
+  .stat{background:rgba(245,248,250,.92);border-radius:12px;padding:9px 10px;display:flex;align-items:center;gap:10px;margin-bottom:8px;min-height:54px}
+  .statIcon{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;background:#fff;font-size:19px;flex-shrink:0}
+  .statLabel{display:block;font-size:11px;color:#7c8991;line-height:1.3}.statValue{display:block;font-size:16px;line-height:1.45;font-weight:700}
+  .sellBtn{width:100%;border:0;border-radius:11px;padding:11px 8px;font-family:inherit;font-weight:700;font-size:13px;background:#f2c400;color:#6a5200;box-shadow:0 3px 0 #d4a900;cursor:pointer;transition:transform .12s,filter .12s}
+  .sellBtn:disabled{background:#ddd;color:#9ba3a7;box-shadow:0 3px 0 #c5c5c5;cursor:not-allowed}.sellBtn:not(:disabled):hover{filter:brightness(1.04);transform:translateY(-1px)}
+  .hintTiny{text-align:center;font-size:10px;color:#8b989d;margin-top:7px}
+  .camRow{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.camBtn{flex:1 1 40%;border:1.5px solid rgba(86,106,117,.2);background:#fff;border-radius:9px;padding:6px 2px;font:600 11px 'Kanit',sans-serif;color:var(--ink);cursor:pointer}.camBtn:hover{border-color:#9bdcbd}.tab{font-size:11px!important}
+  #board{left:16px;bottom:56px;width:262px;padding:10px}.bTop{display:flex;justify-content:space-between;font-weight:700;margin-bottom:6px}.lb{width:100%;border-collapse:collapse;font-size:12px}.lb th{text-align:left;color:#7c8991;font-weight:600;padding:3px 4px;border-bottom:1px solid var(--line)}.lb td{padding:4px}.lb tr.me td{background:#eafaf3}
+  #menu{position:fixed;inset:0;z-index:35;display:none;place-items:center;background:rgba(14,35,42,.62);backdrop-filter:blur(6px);padding:12px;overflow:auto}#menu.open{display:grid}.menuCard{width:min(680px,96vw);max-height:94vh;overflow:auto;background:#fff;border-radius:20px;padding:20px;border:3px solid #3da5e7;box-shadow:0 20px 60px rgba(0,0,0,.25)}.menuCard h2{margin:0 0 8px;color:#2085c7}.menuCard h3{margin:10px 0 6px;font-size:15px}.nm{display:block;margin-bottom:10px;font-size:13px}.nm input{font:inherit;padding:6px 9px;border:1.5px solid #cfd8de;border-radius:8px;margin-left:6px;width:160px}.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}.mode{background:#f4f8fb;border-radius:14px;padding:12px;display:flex;flex-direction:column}.mode ul{margin:0 0 10px;padding-left:18px;font-size:12px;line-height:1.55;flex:1}.mbtn{border:0;border-radius:10px;padding:10px 14px;font:700 13px 'Kanit',sans-serif;background:#13c96a;color:#fff;cursor:pointer;margin-top:6px;box-shadow:0 3px 0 #0e9a50}.mbtn.alt{background:#36a0df;box-shadow:0 3px 0 #237cb3}.mbtn:disabled{background:#ccd3d7;box-shadow:0 3px 0 #b5bcc0;cursor:not-allowed}@media(max-width:620px){.modes{grid-template-columns:1fr}#board{bottom:48px;width:210px;font-size:10px}}
+  #silo{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:18;background:rgba(255,255,255,.95);border:2px solid #e0b2ab;border-radius:14px;padding:8px 12px;display:none;box-shadow:0 6px 18px rgba(0,0,0,.15);font-size:13px;min-width:190px}#silo.show{display:block}.sTop{display:flex;justify-content:space-between;margin-bottom:4px;color:#b3372d}.sRow{display:flex;gap:14px;margin-bottom:6px}.sRow i{font-style:normal;color:#7c8991}.sBtns{display:flex;gap:6px}.sickle{flex:1.6;display:flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:10px;background:#f5c62c;font:700 13px 'Kanit',sans-serif;cursor:pointer;padding:4px 8px;box-shadow:0 3px 0 #c79a12}.sickle:active{transform:translateY(2px)}.sickle.dim{opacity:.55}#siloUp{flex:1 1 auto;font-size:12px}
+  #slash{position:fixed;left:50%;top:42%;z-index:30;pointer-events:none;opacity:0}#slash.go{animation:slash .55s ease-out}@keyframes slash{0%{opacity:0;transform:translate(-50%,-50%) rotate(-80deg) scale(.7)}30%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) rotate(60deg) scale(1.15)}}
+  #alertBar{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:38;background:#e5483f;color:#fff;padding:10px 16px;border-radius:12px;font-weight:700;display:none;max-width:90vw;text-align:center;box-shadow:0 6px 20px rgba(0,0,0,.3)}#status{position:fixed;left:50%;transform:translateX(-50%);top:112px;z-index:17;display:flex;gap:6px;flex-wrap:wrap;justify-content:center;pointer-events:none}#status span{background:#e5483f;color:#fff;border-radius:999px;padding:3px 10px;font:600 12px 'Kanit',sans-serif}
+  #qTimer{position:relative;height:18px;background:#e7edf1;border-radius:9px;margin:8px 0;overflow:hidden;display:none}#qBar{position:absolute;inset:0 auto 0 0;width:100%;background:linear-gradient(90deg,#f5c62c,#ef5346);transition:width .12s linear}#qNum{position:relative;z-index:1;font:700 12px 'Kanit',sans-serif;line-height:18px;display:block;text-align:center}#loanBox{margin-top:8px;display:flex;gap:6px;align-items:center;justify-content:space-between;font-size:12px}
+  .diffRow{display:flex;gap:6px;margin:2px 0 4px}.dbtn{flex:1;border:2px solid #cfd8de;background:#fff;border-radius:9px;padding:5px;font:600 12px 'Kanit',sans-serif;cursor:pointer}.dbtn.on{border-color:#13c96a;background:#eafaf3}
+  #shop{right:16px;top:16px;width:255px;padding:12px;max-height:calc(100vh - 32px);overflow:auto;scrollbar-width:thin}
+  .tabs{display:flex;gap:3px;border-bottom:1px solid var(--line);margin-bottom:9px}
+  .tab{flex:1;border:0;background:transparent;font-family:inherit;padding:7px 3px 8px;color:#849199;font-size:12px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent}
+  .tab.active{color:var(--green);border-color:var(--green)}
+  .shopList{display:flex;flex-direction:column;gap:7px}
+  .seedCard,.buildCard{width:100%;border:1.5px solid rgba(86,106,117,.18);background:rgba(255,255,255,.9);border-radius:12px;padding:9px 10px;text-align:left;cursor:pointer;font-family:inherit;color:var(--ink);transition:transform .12s,border-color .12s,background .12s}
+  .seedCard:hover:not(:disabled),.buildCard:hover:not(:disabled){transform:translateY(-1px);border-color:#9bdcbd}.seedCard:disabled{opacity:.56;cursor:not-allowed;background:#f1f3f2}.seedCard.locked{border-style:dashed}.unlock{font-size:10px;color:#9a7a2d;margin-top:5px}.seedCard.selected{border-color:#13c96a;background:#eafaf3;box-shadow:inset 0 0 0 1px #13c96a}
+  .seedTop,.seedBottom,.buildTop{display:flex;align-items:center;justify-content:space-between;gap:8px}.seedName{font-size:12px;font-weight:700}.earn{font-size:11px;font-weight:600;color:#0eaf5c;white-space:nowrap}.cost{font-size:11px;color:#f04738}.time{font-size:11px;color:#89969b}.buildCard{cursor:pointer}.buildCard:disabled{opacity:.55;cursor:not-allowed;background:#f3f4f4}.buildName{font-size:12px;font-weight:700}.buildCost{font-size:11px;color:#e84e3f;white-space:nowrap}.buildDesc{font-size:10px;color:#88949b;margin-top:4px}
+  #instructions{position:fixed;z-index:4;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(35,66,77,.78);color:#fff;padding:9px 18px;border-radius:25px;font-size:11px;white-space:nowrap;backdrop-filter:blur(6px);box-shadow:0 4px 16px #3a718433;pointer-events:none}
+  .yellow{color:#ffdb2e;font-weight:700}#toast{position:fixed;z-index:20;left:50%;top:19px;transform:translate(-50%,-15px);opacity:0;pointer-events:none;background:rgba(31,54,65,.88);color:#fff;padding:9px 17px;border-radius:30px;font-size:13px;box-shadow:0 5px 20px #17374733;transition:opacity .2s,transform .2s;white-space:nowrap}#toast.show{opacity:1;transform:translate(-50%,0)}
+  .floatText{position:fixed;z-index:15;pointer-events:none;font-size:15px;font-weight:700;text-shadow:0 2px 4px rgba(0,0,0,.12);white-space:nowrap;transform:translate(-50%,-50%);will-change:transform,opacity}
+  #modalWrap{position:fixed;inset:0;z-index:30;display:none;place-items:center;background:rgba(14,35,42,.57);backdrop-filter:blur(5px);padding:16px}#modalWrap.open{display:grid}
+  .modal{width:min(420px,96vw);border-radius:20px;background:#fff;padding:23px 24px 20px;box-shadow:0 20px 60px rgba(0,0,0,.22);border:3px solid #3da5e7;text-align:center;animation:popIn .2s ease-out}
+  @keyframes popIn{from{transform:scale(.94);opacity:.4}to{transform:scale(1);opacity:1}}
+  .modal h2{margin:0 0 4px;color:#2085c7;font-size:21px}.modal .sub{font-size:12px;color:#8b989c;margin-bottom:16px}.question{background:#f1f3f7;border-radius:13px;padding:17px 10px;font-weight:700;font-size:25px;margin-bottom:13px;color:#2f4254;line-height:1.4}.answers{display:grid;grid-template-columns:1fr 1fr;gap:9px}.answer{border:0;border-radius:11px;background:#36a0df;color:white;box-shadow:0 3px 0 #237cb3;font:600 14px 'Kanit',sans-serif;padding:12px 6px;cursor:pointer;min-height:48px}.answer:hover:not(:disabled){filter:brightness(1.05);transform:translateY(-1px)}.answer:disabled{opacity:.65;cursor:default}.answer.correct{background:#23ba72;box-shadow:0 3px 0 #168f54}.answer.wrong{background:#ef6152;box-shadow:0 3px 0 #c53d34}.feedback{min-height:27px;margin-top:12px;font-size:13px;font-weight:600}.closeBtn{border:0;background:#f04e3c;color:#fff;border-radius:8px;font:500 12px 'Kanit',sans-serif;padding:8px 17px;cursor:pointer;margin-top:7px}
+  #loading{position:fixed;inset:0;z-index:40;background:#7bd0ee;display:grid;place-items:center;color:#234556;font-weight:600;transition:opacity .35s}.loadingCard{padding:20px 28px;border-radius:18px;background:#ffffffd9;box-shadow:0 10px 30px #16465a20;text-align:center}.spinner{width:26px;height:26px;border:3px solid #b3e5f4;border-top-color:#15bd70;border-radius:50%;margin:0 auto 10px;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+  @media(max-width:760px){#hud{top:8px;left:8px;width:170px;padding:9px;border-radius:14px}.brand{font-size:13px;margin-bottom:7px}.stat{padding:6px;min-height:43px;gap:6px;margin-bottom:5px}.statIcon{width:25px;height:25px;font-size:15px}.statLabel{font-size:9px}.statValue{font-size:13px}.sellBtn{font-size:11px;padding:8px}#shop{top:8px;right:8px;width:190px;padding:8px;max-height:55vh;border-radius:14px}.tab{font-size:10px;padding:5px 1px 6px}.seedCard,.buildCard{padding:7px}.seedName,.buildName{font-size:10px}.earn,.cost,.time,.buildCost{font-size:9px}.buildDesc{font-size:9px}#instructions{bottom:10px;font-size:9px;padding:7px 10px;max-width:94vw;white-space:normal;text-align:center}.modal{padding:18px 15px}.question{font-size:22px}}
+  @media(max-width:420px){#hud{width:142px}#shop{width:166px}.brand{font-size:11px}.statValue{font-size:12px}.statIcon{width:21px;height:21px}.seedTop{align-items:flex-start}.earn{font-size:8px}.hintTiny{font-size:9px}}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hud" class="panel">
+  <div class="brand"><span>🌿</span><span>Mini Farm Island</span></div>
+  <div class="stat"><div class="statIcon">🪙</div><div><span class="statLabel">Your coins</span><span class="statValue" id="moneyValue">100 coins</span></div></div>
+  <div class="stat"><div class="statIcon">📦</div><div><span class="statLabel">Inventory</span><span class="statValue" id="inventoryValue">0 items</span></div></div>
+  <div class="stat"><div class="statIcon">🏠</div><div><span class="statLabel">House level</span><span class="statValue" id="houseLevelValue">Level 1/15</span></div></div>
+  <button class="sellBtn" id="sellBtn" disabled>Sell all produce</button>
+  <div class="hintTiny" id="sellHint">Grow crops to harvest</div>
+  <div class="camRow"><button class="camBtn" id="camHome">🏝️ Farm</button><button class="camBtn" id="camAnimal">🐄 Animals</button><button class="camBtn" id="bookBtn">📖 Words</button><button class="camBtn" id="muteBtn">🔊 Sound</button><button class="camBtn" id="menuBtn">☰ Menu</button></div>
+</div>
+<div id="shop" class="panel">
+  <div class="tabs"><button class="tab active" id="seedTab">🛒 Seeds</button><button class="tab" id="buildTab">🔨 Build</button><button class="tab" id="animalTab">🐾 Animals</button></div>
+  <div id="seedList" class="shopList"></div>
+  <div id="buildList" class="shopList" style="display:none"></div>
+  <div id="animalList" class="shopList" style="display:none"></div>
+</div>
+<div id="instructions">Pick a seed → click a plot (2 crops per plot) → wait → click a ripe plant to <span class="yellow">harvest</span></div>
+<div id="toast"></div>
+<div id="silo"><div class="sTop"><b>🏠 Silo</b><span id="siloLv">Lv.1</span></div><div class="sRow"><span>🌾 <b id="siloW">0</b>/<i class="sc">10</i></span><span>🌽 <b id="siloC">0</b>/<i class="sc">10</i></span></div><div class="sBtns"><button id="sickleBtn" class="sickle" title="Reap all ripe wheat and corn"><svg viewBox="0 0 32 32" width="26" height="26"><path d="M6 27 L13 20" stroke="#8b5a2b" stroke-width="4" stroke-linecap="round"/><path d="M13 20 C3 12 11 2 27 5 C18 7 15 12 17 17 Z" fill="#d9e2e8" stroke="#5f7380" stroke-width="1.4" stroke-linejoin="round"/></svg><span>Reap <b id="ripeN">0</b></span></button><button id="siloUp" class="camBtn">⬆</button></div></div>
+<div id="slash"><svg viewBox="0 0 32 32" width="230" height="230"><path d="M6 27 L13 20" stroke="#8b5a2b" stroke-width="3" stroke-linecap="round"/><path d="M13 20 C3 12 11 2 27 5 C18 7 15 12 17 17 Z" fill="#eef3f6" stroke="#5f7380" stroke-width="1"/></svg></div>
+<div id="alertBar"></div><div id="status"></div>
+<div id="board" class="panel" style="display:none"><div class="bTop"><span>🏆 Rush</span><b id="rushTime">16:00</b></div><table class="lb"><thead><tr><th>Player</th><th>Sales</th><th>✔</th><th>Score</th></tr></thead><tbody id="boardRows"></tbody></table><div id="loanBox"><span id="loanTxt"></span><button class="camBtn" id="loanBtn" style="flex:0 1 auto"></button></div></div>
+<div id="menu"><div class="menuCard" id="menuBody"></div></div>
+<div id="modalWrap" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal">
+    <h2 id="modalTitle">🤖 Watering Robot</h2>
+    <div class="sub" id="modalSub">Learn farm words and earn a 10s watering buff!</div>
+    <div class="question" id="questionText">What is this in English?</div>
+    <div class="answers" id="answerButtons"></div>
+    <div class="feedback" id="quizFeedback"></div>
+    <button class="closeBtn" id="closeModal">Close</button>
+  </div>
+</div>
+<div id="loading"><div class="loadingCard"><div class="spinner"></div>Building your farm islands...</div></div>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+let Tone = null;
+
+const $ = id => document.getElementById(id);
+const canvas = $('game');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#78ccef');
+scene.fog = new THREE.Fog('#78ccef', 48, 125);
+const camera = new THREE.PerspectiveCamera(43, innerWidth/innerHeight, 0.1, 220);
+camera.position.set(23, 26, 36);
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.14;
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 1.45, 2.1); controls.enableDamping = true; controls.dampingFactor=.065;
+controls.minDistance=13; controls.maxDistance=62; controls.minPolarAngle=.12; controls.maxPolarAngle=Math.PI*.48;
+controls.maxTargetRadius=12; controls.target0 = controls.target.clone();
+
+scene.add(new THREE.HemisphereLight(0xe6f8ff, 0x78934e, 2.0));
+const sun = new THREE.DirectionalLight(0xfff1d2, 3.0); sun.position.set(-7,18,11); sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-30; sun.shadow.camera.right=30; sun.shadow.camera.top=30; sun.shadow.camera.bottom=-30; sun.shadow.bias=-0.00025; scene.add(sun);
+const fill = new THREE.DirectionalLight(0xb9efff, .65); fill.position.set(12,10,-9); scene.add(fill);
+const mat=(color,roughness=.88,extra={})=>new THREE.MeshStandardMaterial({color,roughness,...extra});
+const mats={grass:mat('#91ed70'),sand:mat('#ffdb8b'),sandLight:mat('#ffeaa2'),soil:mat('#704326'),wood:mat('#965a28'),woodTop:mat('#bd7b36'),leaf:mat('#23985b'),leaf2:mat('#32a566'),trunk:mat('#80502d'),stone:mat('#919b99'),stoneLight:mat('#b1b9b4'),white:mat('#f4f0df'),blue:mat('#37a9db'),dark:mat('#334955'),orange:mat('#ff861d'),red:mat('#ff4357'),cabbage:mat('#8ff0b1'),window:mat('#8de5f3',.25,{metalness:.1})};
+const GROUND=1.38;
+function mesh(geometry, material, parent=scene, x=0,y=0,z=0){const o=new THREE.Mesh(geometry,material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;}
+function box(parent,x,y,z,sx,sy,sz,material){return mesh(new THREE.BoxGeometry(sx,sy,sz),material,parent,x,y,z)}
+function cylinder(parent,x,y,z,rt,rb,h,material,seg=8){return mesh(new THREE.CylinderGeometry(rt,rb,h,seg),material,parent,x,y,z)}
+function cone(parent,x,y,z,r,h,material,seg=7){return mesh(new THREE.ConeGeometry(r,h,seg),material,parent,x,y,z)}
+
+// Ocean: a gently animated, faceted water sheet.
+const waterGeo=new THREE.PlaneGeometry(220,220,88,88); waterGeo.rotateX(-Math.PI/2);
+const waterMat=new THREE.MeshStandardMaterial({color:'#59c1e9',roughness:.48,metalness:.04,flatShading:true});
+const water=new THREE.Mesh(waterGeo,waterMat); water.position.y=-.12; water.receiveShadow=true; scene.add(water);
+const waterBase=waterGeo.attributes.position.array.slice();
+// Soft translucent blue fringe below the floating island.
+const underMat=new THREE.MeshBasicMaterial({color:'#3aaad4',transparent:true,opacity:.18,depthWrite:false});
+const underside=mesh(new THREE.SphereGeometry(13.6,20,9),underMat,scene,0,-.65,0); underside.scale.y=.18; underside.castShadow=false;
+// Rounded low-poly island layers.
+cylinder(scene,0,-.5,0,12.8,11.5,1.24,mats.sand,24);
+cylinder(scene,0,.47,0,14.1,12.8,.7,mats.sandLight,24);
+cylinder(scene,0,1.1,0,15.2,14.1,.56,mats.grass,24);
+const topDisk=mesh(new THREE.CircleGeometry(15.2,48),mats.grass,scene,0,GROUND,0); topDisk.rotation.x=-Math.PI/2; topDisk.castShadow=false;
+// A few low-poly grass tufts and tiny flowers around the perimeter.
+for(let i=0;i<48;i++){
+  const a=Math.random()*Math.PI*2,r=12.0+Math.random()*2.25,x=Math.cos(a)*r,z=Math.sin(a)*r;
+  if(Math.abs(x)<4.8 && z<3.8 && z>-2.5) continue;
+  const g=new THREE.Group();g.position.set(x,GROUND+.03,z);scene.add(g);
+  for(let j=0;j<2;j++){const blade=cone(g,(Math.random()-.5)*.12,.12,(Math.random()-.5)*.12,.055,.25,mat(j?'#60ce65':'#55c75c'),4);blade.rotation.z=(Math.random()-.5)*.5;blade.castShadow=false;}
+  if(i%4===0){const f=mesh(new THREE.IcosahedronGeometry(.075,0),mat(['#fff1a5','#ffdbdb','#d9ecff'][i%3]),g,0,.19,0);f.castShadow=false;}
+}
+// Decorative rocks.
+function makeRock(x,z,s=1){const g=new THREE.Group();g.position.set(x,GROUND-.02,z);scene.add(g);const r=mesh(new THREE.DodecahedronGeometry(.47*s,0),mats.stone,g,0,.25*s,0);r.scale.set(1.25,.72,1);r.rotation.set(.1,Math.random()*2,.2);mesh(new THREE.DodecahedronGeometry(.25*s,0),mats.stoneLight,g,-.2*s,.26*s,.08*s).scale.y=.7;return g;}
+makeRock(-10.2,5.6,1.0);makeRock(9.8,6.4,1.35);makeRock(10.7,-4.2,.8);makeRock(-4.3,-10.9,.7);makeRock(2.7,12.1,.72);
+
+// Trees sway gently at the trunk base.
+const trees=[];
+function makeTree(x,z,s=1){const pivot=new THREE.Group();pivot.position.set(x,GROUND,z);scene.add(pivot);cylinder(pivot,0,.78*s,0,.27*s,.34*s,1.55*s,mats.trunk,7);
+  const f1=cone(pivot,0,1.85*s,0,1.0*s,2.35*s,mat('#22945a'),7);const f2=cone(pivot,0,2.75*s,0,.76*s,2.05*s,mat('#2da566'),7);const f3=cone(pivot,0,3.5*s,0,.5*s,1.52*s,mat('#3aa86c'),7);
+  f1.rotation.y=.2;f2.rotation.y=.4;f3.rotation.y=.15;trees.push({pivot,phase:Math.random()*Math.PI*2,baseRot:(Math.random()-.5)*.08});return pivot;}
+makeTree(-10.5,-5.0,1.12);makeTree(-9.4,3.3,.92);makeTree(10.4,-7.3,1.08);makeTree(10.8,2.4,.95);makeTree(6.2,11.1,.83);makeTree(-1.8,12.3,.9);makeTree(-12.2,.2,.88);
+
+// House, rebuilt when an upgrade is purchased.
+let houseGroup=null, chimneyPoint=new THREE.Vector3(.75,5.7,-5.25);
+function clearGroup(group){if(!group)return;scene.remove(group);group.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material.dispose();}});}
+function createHouse(level=1){clearGroup(houseGroup);houseGroup=new THREE.Group();houseGroup.position.set(0,0,-5.15);scene.add(houseGroup);
+  const w=2.75+(level-1)*.12,d=2.4+(level-1)*.085,h=2.15+(level-1)*.075;
+  const wallColors=['#e8d5b8','#ead8bd','#eadac0','#ead8c3','#e6dcc0','#d8e6d4','#d9e8ef','#e9d6ef'];
+  const wall=mat(level>=13?'#f0dfb8':wallColors[Math.min(7,Math.floor((level-1)/2))]);
+  box(houseGroup,0,GROUND+h/2,0,w,h,d,wall);
+  box(houseGroup,0,GROUND+.08,d/2+.035,w+.14,.16,d+.1,mat('#c8b79b'));
+  const roofColors=['#ff6814','#fb6b16','#287fb1','#e5a22b','#e35a8d','#45a76d','#298fb9','#8a66bf','#dd7253','#299eaa'];
+  const roofColor=level>=15?'#e7b93c':roofColors[Math.min(roofColors.length-1,Math.floor((level-1)*roofColors.length/15))];
+  const roof=cone(houseGroup,0,GROUND+h+.72+(level-1)*.018,0,2.15+(level-1)*.09,1.45+(level-1)*.025,mat(roofColor),4);roof.rotation.y=Math.PI/4;roof.scale.z=1.02;
+  // Front door, windows and trim grow with the house.
+  const front=d/2+.028;box(houseGroup,-.27,GROUND+.72,front,.58,1.34,.075,mat('#84502a'));
+  box(houseGroup,-.27,GROUND+.12,front+.045,.72,.1,.1,mat('#bf8d50'));
+  for(const wx of [-w*.31,w*.31]){box(houseGroup,wx,GROUND+1.48,front,.46,.52,.06,mat('#75d9f0',.28,{metalness:.1}));box(houseGroup,wx,GROUND+1.48,front+.04,.055,.58,.04,mat('#f4e9d2'));box(houseGroup,wx,GROUND+1.48,front+.04,.5,.05,.04,mat('#f4e9d2'));}
+  // The chimney stays aligned with the changing roof height, keeping smoke attached.
+  const cx=w*.3,cz=-d*.18,cy=GROUND+h+1.14+(level-1)*.018;
+  box(houseGroup,cx,cy,cz,.43+(level-1)*.012,.85+(level-1)*.02,.43,mat('#858b88'));
+  box(houseGroup,cx,cy+.45,cz,.53,.12,.53,mat('#626c6e'));
+  chimneyPoint.set(cx,cy+.49,-5.15+cz);
+  if(level>=2){const wingX=-w*.48;box(houseGroup,wingX,GROUND+.68,d*.1,1.1+(level-2)*.035,1.36,1.25,mat('#dfc9a8'));const wingRoof=cone(houseGroup,wingX,GROUND+1.75,d*.1,.95+(level-2)*.02,.8,mat(roofColor),4);wingRoof.rotation.y=Math.PI/4;}
+  if(level>=3){const porchZ=d/2+.55;box(houseGroup,0,GROUND+.12,porchZ,w*.64,.15,.95,mat('#b8864b'));for(const px of [-w*.28,w*.28])box(houseGroup,px,GROUND+.75,porchZ+.3,.11,1.25,.11,mat('#f5ead5'));}
+  if(level>=4){const upperY=GROUND+h-.48;for(const wx of [-w*.25,w*.25]){box(houseGroup,wx,upperY,front+.005,.48,.42,.07,mat('#75d9f0',.25));box(houseGroup,wx,upperY,front+.05,.06,.48,.045,mat('#f7eddb'));box(houseGroup,wx,upperY,front+.05,.52,.055,.045,mat('#f7eddb'));}}
+  if(level>=7){const balconyZ=front+.36;box(houseGroup,0,GROUND+h-.72,balconyZ,w*.78,.12,.65,mat('#b8864b'));box(houseGroup,0,GROUND+h-.34,balconyZ+.27,w*.78,.07,.07,mat('#f5ead5'));for(const px of [-w*.34,-w*.17,0,w*.17,w*.34])box(houseGroup,px,GROUND+h-.51,balconyZ+.27,.055,.35,.055,mat('#f5ead5'));}
+  if(level>=10){for(const sx of [-1,1]){const planter=box(houseGroup,sx*w*.39,GROUND+.24,front+.28,.48,.27,.36,mat('#a86b42'));for(let k=0;k<3;k++){const bloom=mesh(new THREE.IcosahedronGeometry(.12,0),mat(k%2?'#ffb8cf':'#fff09a'),houseGroup,sx*w*.39+(k-1)*.13,GROUND+.48,front+.28);bloom.castShadow=false;}}}
+  if(level>=13){cylinder(houseGroup,w*.34,GROUND+h+1.48,0,.045,.045,.95,mat('#f5ead5'),6);const flag=box(houseGroup,w*.34+.27,GROUND+h+1.72,0,.54,.3,.045,mat(level>=15?'#e7b93c':'#f25d69'));flag.rotation.y=.12;}
+  if(level>=15){mesh(new THREE.OctahedronGeometry(.23,0),mat('#fff0a0',.3,{metalness:.22}),houseGroup,0,GROUND+h+2.02,0);}
+  houseGroup.userData.level=level;
+}
+createHouse(1);
+
+// Well and tiny red roof.
+const well=new THREE.Group();well.position.set(-4.5,0,-1.35);scene.add(well);
+cylinder(well,0,GROUND+.32,0,.63,.67,.64,mat('#969f9e'),12);
+cylinder(well,0,GROUND+.59,0,.48,.48,.09,mat('#43b9e9'),16);
+cylinder(well,0,GROUND+.68,0,.5,.5,.1,mat('#6d7777'),12);
+for(const px of [-.42,.42])box(well,px,GROUND+1.25,0,.12,1.1,.12,mats.wood);
+const wellRoof=cone(well,0,GROUND+1.95,0,.92,.75,mat('#ff493a'),4);wellRoof.rotation.y=Math.PI/4;
+box(well,0,GROUND+1.52,.0,.1,.13,.92,mats.wood);
+
+// Robot: its mesh parts and a canvas billboard are clickable.
+const robotRoot=new THREE.Group();robotRoot.position.set(-4.45,0,.58);scene.add(robotRoot);
+const robotBody=new THREE.Group();robotRoot.add(robotBody);
+const robotWhite=mat('#e8e6dc'),robotBlue=mat('#329bd2'),robotGold=mat('#ffcf36'),robotDark=mat('#314454');
+box(robotBody,0,GROUND+.92,0,.68,.95,.47,robotWhite);
+box(robotBody,0,GROUND+.42,.035,.72,.19,.5,robotBlue);
+for(const lx of [-.2,.2]){box(robotBody,lx,GROUND+.19,.04,.2,.32,.25,robotBlue);box(robotBody,lx,GROUND+.045,.12,.27,.09,.32,robotDark);}
+const head=mesh(new THREE.BoxGeometry(.64,.48,.5),robotWhite,robotBody,0,GROUND+1.68,0);
+box(robotBody,0,GROUND+1.36,.254,.32,.07,.035,robotDark);
+for(const ex of [-.16,.16]){mesh(new THREE.SphereGeometry(.07,8,6),robotGold,robotBody,ex,GROUND+1.73,.263);}
+for(const ax of [-1,1]){const arm=box(robotBody,ax*.47,GROUND+1.0,0,.18,.57,.2,robotWhite);arm.rotation.z=ax*.24;mesh(new THREE.SphereGeometry(.12,7,5),robotBlue,robotBody,ax*.52,GROUND+.69,0);}
+mesh(new THREE.SphereGeometry(.09,8,6),robotBlue,robotBody,0,GROUND+2.03,0);
+const robotHit=mesh(new THREE.CylinderGeometry(.72,.72,2.4,8),new THREE.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),robotRoot,0,GROUND+1.05,0);robotHit.castShadow=false;
+// Billboard is a canvas-backed THREE.Sprite, always facing the camera.
+const signCanvas=document.createElement('canvas');signCanvas.width=512;signCanvas.height=150;const signCtx=signCanvas.getContext('2d');
+const signTex=new THREE.CanvasTexture(signCanvas);signTex.colorSpace=THREE.SRGBColorSpace;
+const signSprite=new THREE.Sprite(new THREE.SpriteMaterial({map:signTex,transparent:true,depthTest:true}));signSprite.scale.set(2.0,.58,1);signSprite.position.set(-4.45,GROUND+3.05,.58);scene.add(signSprite);
+let robotSignMode='quiz';
+function updateRobotSign(text,mode='quiz'){
+  robotSignMode=mode;signCtx.clearRect(0,0,512,150);signCtx.fillStyle=mode==='buff'?'#0ba95c':mode==='broken'?'#e5483f':'#283c4c';
+  const rr=25;signCtx.beginPath();signCtx.moveTo(rr,8);signCtx.arcTo(504,8,504,142,rr);signCtx.arcTo(504,142,8,142,rr);signCtx.arcTo(8,142,8,8,rr);signCtx.arcTo(8,8,504,8,rr);signCtx.closePath();signCtx.fill();signCtx.lineWidth=8;signCtx.strokeStyle='#f5c62c';signCtx.stroke();
+  signCtx.font='bold 52px Kanit, sans-serif';signCtx.textAlign='center';signCtx.textBaseline='middle';signCtx.fillStyle='#fff';signCtx.fillText(text,256,77);signTex.needsUpdate=true;
+}
+updateRobotSign('QUIZ 🤖','quiz');
+
+// 31 crops: three starter crops, then exactly two new crops for every house level 2–15.
+const cropRows=[
+ ['tomato','มะเขือเทศ','🍅',10,25,5,'#ff4355','#2da761','tomato',1],
+ ['carrot','แครอท','🥕',20,60,8,'#ff8c29','#2da761','carrot',1],
+ ['cabbage','กะหล่ำปลี','🥬',50,200,12,'#96efb1','#66ce80','cabbage',1],
+ ['strawberry','สตรอว์เบอร์รี','🍓',25,75,7,'#f34872','#329b4c','berry',2],
+ ['watermelon','แตงโม','🍉',45,120,10,'#45bb5b','#2b9850','melon',2],
+ ['corn','ข้าวโพด','🌽',65,170,13,'#f5c83c','#339e4e','corn',3],
+ ['pumpkin','ฟักทอง','🎃',75,210,14,'#ff9634','#398f43','pumpkin',3],
+ ['eggplant','มะเขือม่วง','🍆',85,250,15,'#8f58c7','#459b53','eggplant',4],
+ ['cucumber','แตงกวา','🥒',90,260,16,'#3ea95d','#247c47','cucumber',4],
+ ['banana','กล้วย','🍌',110,300,18,'#f5d64b','#398b43','banana',5],
+ ['apple','แอปเปิล','🍎',120,340,19,'#e9434a','#398f43','apple',5],
+ ['grapes','องุ่น','🍇',135,390,20,'#9c5bdd','#358a48','grapes',6],
+ ['pineapple','สับปะรด','🍍',150,450,22,'#e7b33d','#348c43','pineapple',6],
+ ['chili','พริก','🌶️',165,490,22,'#eb4b38','#388f46','chili',7],
+ ['onion','หอมหัวใหญ่','🧅',180,540,24,'#c895d7','#438f4b','onion',7],
+ ['potato','มันฝรั่ง','🥔',200,600,25,'#bd925a','#4a984e','potato',8],
+ ['beet','บีตรูต','🫜',220,650,26,'#bb376e','#368d4c','beet',8],
+ ['broccoli','บรอกโคลี','🥦',240,720,28,'#36a95b','#257e43','broccoli',9],
+ ['pepper','พริกหวาน','🫑',260,780,29,'#e64c43','#2f8f48','pepper',9],
+ ['lemon','เลมอน','🍋',280,840,30,'#f4d83c','#418f43','lemon',10],
+ ['orange','ส้ม','🍊',300,900,31,'#ff982e','#438f43','orange',10],
+ ['peach','พีช','🍑',330,990,33,'#ff9f8b','#438d49','peach',11],
+ ['pear','ลูกแพร์','🍐',350,1050,34,'#b9d84b','#408c47','pear',11],
+ ['blueberry','บลูเบอร์รี','🫐',380,1140,36,'#526ec9','#438f43','blueberry',12],
+ ['cherry','เชอร์รี','🍒',410,1230,37,'#cf2747','#438f43','cherry',12],
+ ['mushroom','เห็ด','🍄',440,1320,39,'#e76a56','#b88956','mushroom',13],
+ ['garlic','กระเทียม','🧄',470,1410,40,'#ece6d8','#438f43','garlic',13],
+ ['rice','ข้าว','🌾',500,1500,42,'#e2c967','#51994c','rice',14],
+ ['coffee','กาแฟ','☕',540,1620,44,'#8a5638','#2c8748','coffee',14],
+ ['mango','มะม่วง','🥭',580,1740,46,'#f1a83a','#3e9849','mango',15],
+ ['kiwi','กีวี','🥝',620,1860,48,'#8b9e43','#478b45','kiwi',15]
+];
+const crops=Object.fromEntries(cropRows.map(([key,name,emoji,cost,sell,grow,color,leafColor,shape,unlockLevel])=>[key,{name,emoji,cost,sell,grow,color,leafColor,shape,unlockLevel}]));
+crops.wheat={name:'Wheat',emoji:'🌾',cost:15,sell:35,grow:9,color:'#e6c35c',leafColor:'#6aa84f',shape:'wheat',unlockLevel:1,island:2};
+crops.egg={name:'Egg',emoji:'🥚',cost:0,sell:120,grow:0,unlockLevel:99,product:true};
+crops.corn.island=2;
+crops.milk={name:'Milk',emoji:'🥛',cost:0,sell:420,grow:0,unlockLevel:99,product:true};
+crops.duckegg={name:'Duck Egg',emoji:'🥚',cost:0,sell:160,grow:0,unlockLevel:99,product:true};
+crops.wool={name:'Wool',emoji:'🧶',cost:0,sell:600,grow:0,unlockLevel:99,product:true};
+crops.truffle={name:'Truffle',emoji:'🍄',cost:0,sell:900,grow:0,unlockLevel:99,product:true};
+for(const k in crops)if(!crops[k].product)crops[k].name=({pepper:'Bell Pepper',beet:'Beetroot'})[k]||k[0].toUpperCase()+k.slice(1);
+let selectedCrop='tomato',money=100,unlockedPlots=6,houseLevel=1;
+const inventory=Object.fromEntries(Object.keys(crops).map(key=>[key,0]));
+const plots=[];const raycaster=new THREE.Raycaster();const pointer=new THREE.Vector2();let pointerStart=null;
+function drawProgress(slot){const c=slot.barCanvas,ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle='rgba(31,45,48,.9)';ctx.fillRect(3,12,c.width-6,c.height-24);ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=3;ctx.strokeRect(3,12,c.width-6,c.height-24);ctx.fillStyle='#22d176';ctx.fillRect(7,16,Math.max(0,(c.width-14)*slot.growth),c.height-32);slot.barTexture.needsUpdate=true;}
+// 46 plots in a compact 5-column layout. Each plot has two independent planting slots.
+const PLOT_COLS=5,PLOT_ROWS=10,MAX_PLOTS=46;
+function plotGridPosition(i){let row,col;if(i<3){row=0;col=i+1;}else if(i<6){row=1;col=i-2;}else if(i<8){row=1;col=i===6?0:4;}else if(i<43){const k=i-8;row=2+Math.floor(k/PLOT_COLS);col=k%PLOT_COLS;}else{row=9;col=i-42;}return {row,col,x:-3.3+col*1.65,z:.4+row*1.25};}
+function makePlot(i,pos){const {row,col,x,z}=pos||plotGridPosition(i);
+  const g=new THREE.Group();g.position.set(x,0,z);scene.add(g);
+  const frame=box(g,0,GROUND+.075,0,1.58,.15,1.12,mats.woodTop);frame.userData.action='plot';frame.userData.plotIndex=i;
+  const soil=box(g,0,GROUND+.145,0,1.42,.055,.94,mats.soil);soil.userData.action='plot';soil.userData.plotIndex=i;
+  for(let k=-1;k<=1;k++){const ridge=box(g,0,GROUND+.178,k*.28,1.26,.012,.022,mat('#845333'));ridge.castShadow=false;ridge.userData.action='plot';ridge.userData.plotIndex=i;}
+  const p={index:i,x,z,row,col,group:g,soil,frame,unlocked:!pos&&i<6,island:pos?2:1,slots:[]};
+  for(let slotIndex=0;slotIndex<2;slotIndex++){
+    const offsetX=slotIndex===0?-.37:.37,slotX=x+offsetX;
+    const barCanvas=document.createElement('canvas');barCanvas.width=256;barCanvas.height=60;const barTexture=new THREE.CanvasTexture(barCanvas);barTexture.colorSpace=THREE.SRGBColorSpace;
+    const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:barTexture,transparent:true,depthTest:true}));sprite.scale.set(.78,.22,1);sprite.position.set(slotX,GROUND+1.48,z);sprite.visible=false;scene.add(sprite);
+    p.slots.push({index:i*2+slotIndex,plotIndex:i,slotIndex,offsetX,x:slotX,z,plot:p,plant:null,crop:null,growth:0,ripe:false,plantAge:0,matureAge:0,barCanvas,barTexture,sprite,barClock:0});
+  }
+  if(!p.unlocked)g.visible=false;plots.push(p);return p;
+}
+for(let i=0;i<MAX_PLOTS;i++)makePlot(i);
+function tagPlotMeshes(plot){plot.group.traverse(o=>{if(o.isMesh){o.userData.action='plot';o.userData.plotIndex=plot.index;}})}
+plots.forEach(tagPlotMeshes);
+function attachCropAction(group,plot,slotIndex){group.traverse(o=>{if(o.isMesh){o.userData.action='crop';o.userData.plotIndex=plot.index;o.userData.slotIndex=slotIndex;}})}
+function createCropModel(type,plot,slotIndex=0){
+  const c=crops[type],root=new THREE.Group();
+  root.position.set(plot.slots?.[slotIndex]?.x ?? plot.x,GROUND+.12,plot.z);
+  root.userData.cropParts=[];
+  const fruit=mat(c.color),leaf=mat(c.leafColor||'#2da761'),stem=mat('#387d43'),darkLeaf=mat('#247948'),detail=mat('#f7d978');
+  const register=(o,kind='produce',delay)=>{o.userData.cropPartKind=kind;o.userData.cropPartDelay=delay===undefined?Math.random()*.14:delay;root.userData.cropParts.push(o);return o;};
+  const sphere=(x,y,z,sx,sy,sz,m=fruit,detailLevel=8,kind='produce',delay)=>{const o=mesh(new THREE.SphereGeometry(1,detailLevel,Math.max(4,detailLevel-2)),m,root,x,y,z);o.scale.set(sx,sy,sz);return register(o,kind,delay);};
+  const twig=(x,y,z,height=.42,r=.026,m=stem)=>register(cylinder(root,x,y,z,r,r*.76,height,m,6),'stem');
+  const tube=(points,radius,m=fruit,kind='produce',segments=10)=>{const curve=new THREE.CatmullRomCurve3(points.map(v=>new THREE.Vector3(v[0],v[1],v[2])));return register(mesh(new THREE.TubeGeometry(curve,segments,radius,5,false),m,root),'produce'===kind?'produce':kind);};
+  const conePart=(x,y,z,r,h,m=fruit,segments=7,kind='produce')=>register(cone(root,x,y,z,r,h,m,segments),kind);
+  const boxPart=(x,y,z,sx,sy,sz,m=detail,kind='detail')=>register(box(root,x,y,z,sx,sy,sz,m),kind);
+  const leafBlade=(x,y,z,sx=.13,sy=.32,sz=.055,rot=0,m=leaf)=>{const o=mesh(new THREE.SphereGeometry(1,7,5),m,root,x,y,z);o.scale.set(sx,sy,sz);o.rotation.z=rot;return register(o,'leaf');};
+  const crownLeaves=(count=5,y=.72,r=.20)=>{for(let j=0;j<count;j++){const a=j*Math.PI*2/count;const l=leafBlade(Math.cos(a)*r*.52,y,Math.sin(a)*r*.52,.075,.29,.045,Math.cos(a)*.65);l.rotation.x=Math.sin(a)*.5;l.rotation.y=a;}};
+  const surfaceDots=(rx,ry,rz,count,colorHex,size=.018)=>{const dotMat=mat(colorHex);for(let j=0;j<count;j++){const a=j*2.399,yy=.42+((j%4)-1.5)*.045;const x=Math.cos(a)*rx*(.55+(j%3)*.15),z=Math.sin(a)*rz*(.55+(j%2)*.2);sphere(x,yy+ry*.18,z,size,size,size,dotMat,5,'detail',.12+(j%5)*.04);}};
+  const torusPart=(x,y,z,r,tubeRadius,m=detail,kind='detail',radial=5,tubular=14)=>register(mesh(new THREE.TorusGeometry(r,tubeRadius,radial,tubular),m,root,x,y,z),kind);
+  const lathePart=(profile,m=fruit,kind='produce',segments=9)=>register(mesh(new THREE.LatheGeometry(profile.map(v=>new THREE.Vector2(v[0],v[1])),segments),m,root),'produce'===kind?'produce':kind);
+
+  switch(c.shape){
+    case 'tomato': {
+      twig(0,.38,0,.50,.028);crownLeaves(5,.49,.28);
+      for(const [x,y,z,s] of [[-.15,.48,.01,.16],[.15,.49,-.02,.16],[.01,.62,.09,.17]]){
+        sphere(x,y,z,s,s*.94,s,fruit,8,'produce');
+        twig(x,y+.10,z,.09,.012,stem);
+        for(let k=0;k<5;k++){const a=k*Math.PI*2/5;leafBlade(x+Math.cos(a)*.045,y+s*.75,z+Math.sin(a)*.045,.028,.075,.022,.25,leaf);}
+      }break;}
+    case 'carrot': {
+      const r=conePart(0,.39,0,.25,.68,fruit,7,'root');r.rotation.z=Math.PI;
+      for(let j=0;j<3;j++)boxPart(0,.25+j*.12,.125,.13-j*.025,.012,.008,mat('#e87922'),'detail');
+      for(let j=0;j<6;j++){const a=j*Math.PI/3;const l=leafBlade(Math.cos(a)*.13,.72+(j%2)*.06,Math.sin(a)*.13,.055,.30,.035,Math.cos(a)*.5);l.rotation.x=Math.sin(a)*.5;}break;}
+    case 'cabbage': {
+      sphere(0,.48,0,.32,.30,.31,fruit,7,'produce',.06);
+      for(let j=0;j<10;j++){const a=j*Math.PI*2/10;const s=.15+(j%3)*.015;sphere(Math.cos(a)*.21,.39+(j%2)*.03,Math.sin(a)*.21,s,.20,s,mat(j%2?'#7ee5a0':c.color),6,'leaf',j*.012);}
+      for(let j=0;j<6;j++){const a=j*Math.PI/3;const l=leafBlade(Math.cos(a)*.23,.28,Math.sin(a)*.23,.12,.23,.06,Math.cos(a)*.55);l.rotation.x=Math.sin(a)*.25;}break;}
+    case 'berry': {
+      // Strawberry: broad shoulders, a pointed bottom, visible seeds and a leafy crown.
+      const body=conePart(0,.425,0,.225,.47,fruit,9,'produce');body.rotation.z=Math.PI;
+      sphere(0,.535,0,.19,.12,.18,fruit,8,'produce',.04);
+      const seedMat=mat('#ffe89a');
+      for(let row=0;row<4;row++){
+        const y=.30+row*.075, t=(y-.19)/.47, ringR=.205*Math.max(.18,t);
+        const count=row===0?5:8;
+        for(let k=0;k<count;k++){const a=k*Math.PI*2/count+(row%2)*.22;const x=Math.cos(a)*ringR,z=Math.sin(a)*ringR;
+          sphere(x,y,z,.010,.016,.010,seedMat,5,'detail',.30+row*.025);}
+      }
+      twig(0,.675,0,.12,.017,stem);
+      for(let j=0;j<6;j++){const a=j*Math.PI/3;const l=leafBlade(Math.cos(a)*.10,.645,Math.sin(a)*.10,.045,.13,.025,Math.cos(a)*.42,darkLeaf);l.rotation.x=Math.sin(a)*.35;}
+      break;}
+    case 'melon': {
+      // Watermelon silhouette with curved longitudinal stripes, not flat floating bars.
+      sphere(0,.435,0,.405,.285,.345,fruit,10,'produce',.04);
+      const stripeMats=[mat('#287b3d'),mat('#3f9b4b')];
+      for(let j=0;j<9;j++){
+        const a=j*Math.PI*2/9;
+        const pts=[];
+        for(let k=0;k<=12;k++){const u=-.91+k*(1.82/12),q=Math.sqrt(Math.max(.06,1-u*u));
+          pts.push([Math.cos(a)*(.405*q+.008),.435+u*.285,Math.sin(a)*(.345*q+.008)]);}
+        tube(pts,.012,stripeMats[j%2],'detail',16);
+      }
+      sphere(0,.718,0,.055,.035,.055,mat('#527b32'),6,'detail');
+      tube([[0,.72,0],[.09,.76,.015],[.16,.73,.045]],.012,stem,'stem',8);
+      leafBlade(.15,.72,.015,.12,.18,.035,.82,darkLeaf);
+      break;}
+    case 'corn': {
+      // Tall stalk, broad husk leaves and rows of kernels on a tapered ear.
+      twig(0,.47,0,.91,.034,mat('#5c9c3b'));
+      for(let j=0;j<6;j++){const a=j*Math.PI/3;const l=leafBlade(Math.cos(a)*.14,.28+(j%3)*.095,Math.sin(a)*.12,.065,.42,.035,Math.cos(a)*.72,mat(j%2?'#3e9a49':'#58b354'));l.rotation.x=Math.sin(a)*.55;}
+      const cob=sphere(.04,.49,.13,.125,.32,.112,mat('#f8d64b'),8,'produce',.24);cob.rotation.z=-.08;
+      // Husk wraps the lower sides of the ear.
+      for(const side of [-1,1]){const h=leafBlade(.04+side*.105,.40,.135,.065,.28,.035,side*.34,mat('#4c9b43'));h.rotation.x=side*.15;}
+      const kernelMats=[mat('#ffdf57'),mat('#efbb2c'),mat('#ffe987')];
+      for(let row=0;row<8;row++)for(let col=0;col<5;col++){
+        const a=-1.1+col*.55,y=.265+row*.058;
+        const x=.04+Math.sin(a)*.112,z=.13+Math.cos(a)*.104;
+        sphere(x,y,z,.021,.025,.019,kernelMats[(row+col)%3],5,'detail',.34+row*.015);
+      }
+      for(let j=0;j<3;j++)leafBlade((j-1)*.05,.86,.11,.04,.18,.025,(j-1)*.28,darkLeaf);
+      break;}
+    case 'pumpkin': {
+      // Squat ribbed pumpkin with a stubby stem and a creeping vine.
+      sphere(0,.405,0,.345,.265,.33,fruit,9,'produce',.05);
+      for(let j=0;j<9;j++){const a=j*Math.PI*2/9;const lobe=sphere(Math.cos(a)*.225,.405,Math.sin(a)*.225,.12,.255,.115,mat(j%2?'#fca33b':c.color),7,'produce',.09+j*.008);lobe.rotation.z=Math.cos(a)*.08;}
+      twig(0,.68,0,.15,.036,mat('#587a32'));
+      sphere(0,.755,0,.055,.035,.055,mat('#608638'),6,'detail');
+      tube([[.02,.66,0],[.18,.68,.04],[.27,.62,.10],[.33,.65,.14]],.016,mat('#408b42'),'stem',10);
+      for(const side of [-1,1]){const l=leafBlade(side*.23,.65,.08,.10,.17,.035,side*.65,darkLeaf);l.rotation.x=side*.3;}
+      break;}
+    case 'eggplant': {
+      // Long, slightly curved teardrop body and a clearly visible green calyx.
+      const body=lathePart([[.025,-.30],[.075,-.26],[.135,-.16],[.18,-.02],[.185,.09],[.145,.21],[.075,.29],[.045,.31]],fruit,'produce',9);
+      body.position.set(.015,.47,0);body.rotation.z=-.20;
+      twig(0,.755,0,.14,.02,stem);
+      sphere(0,.70,0,.075,.045,.075,darkLeaf,6,'leaf');
+      for(let j=0;j<5;j++){const a=j*Math.PI*2/5;const l=leafBlade(Math.cos(a)*.075,.70,Math.sin(a)*.075,.042,.145,.027,Math.cos(a)*.55,darkLeaf);l.rotation.x=Math.sin(a)*.28;}
+      break;}
+    case 'cucumber': {
+      // Long green cucumber with blunt ends, pale bumps and subtle lengthwise ridges.
+      const body=sphere(0,.415,0,.36,.125,.14,fruit,9,'produce',.12);body.rotation.z=.025;
+      sphere(-.345,.415,0,.045,.095,.09,mat('#3d8140'),7,'produce',.16);
+      sphere(.345,.415,0,.035,.075,.07,mat('#4a9b48'),7,'produce',.18);
+      const ridgeM=mat('#76b84e');
+      for(let j=0;j<7;j++){const a=j*Math.PI*2/7;const pts=[];for(let k=0;k<=8;k++){const u=-.88+k*.22;const q=Math.sqrt(Math.max(.08,1-u*u));pts.push([u*.36,.415+Math.sin(a)*.122*q,Math.cos(a)*.138*q]);}tube(pts,.006,ridgeM,'detail',10);}
+      for(let j=0;j<24;j++){const x=-.28+(j%6)*.105,y=.415+(Math.floor(j/6)-1.5)*.045,z=.125*Math.sqrt(Math.max(.15,1-(x/.38)**2));sphere(x,y,z,.012,.016,.010,mat('#c1e67b'),5,'detail',.35+(j%4)*.02);}
+      twig(-.35,.43,0,.10,.013,stem);tube([[.31,.43,0],[.38,.49,.03],[.45,.47,.08]],.012,stem,'stem',7);leafBlade(.28,.62,.03,.09,.17,.03,.72,darkLeaf);
+      break;}
+    case 'banana': {
+      // A small bunch of curved yellow bananas with dark tips and a shared crown.
+      twig(0,.77,0,.18,.027,mat('#77502e'));
+      const bunch=[
+        {dx:-.11,dz:-.07,r:.052,c:'#f6d54a'},
+        {dx:.00,dz:.04,r:.056,c:'#ffe45a'},
+        {dx:.12,dz:-.035,r:.052,c:'#f6cf35'},
+        {dx:.015,dz:.13,r:.047,c:'#f8dc4c'}
+      ];
+      for(const b of bunch){
+        const x=b.dx,z=b.dz;
+        tube([[x*.45,.70,z],[x-.09,.61,z],[x-.10,.46,z+.015],[x-.035,.335,z+.025],[x+.065,.35,z+.02]],b.r,mat(b.c),'produce',14);
+        sphere(x+.065,.35,z+.02,.022,.025,.022,mat('#57452b'),5,'detail',.28);
+        sphere(x*.45,.70,z,.024,.025,.024,mat('#57452b'),5,'detail',.26);
+      }
+      for(const side of [-1,1]){const l=leafBlade(side*.17,.73,-.02,.055,.30,.03,side*.33,mat('#3b8841'));l.rotation.x=side*.35;}
+      leafBlade(.02,.82,.02,.06,.22,.03,.12,darkLeaf);
+      break;}
+    case 'apple': {
+      // Rounded apple with shoulders, a small top dimple, stem and leaf.
+      sphere(0,.445,0,.265,.265,.245,fruit,9,'produce',.04);
+      for(let j=0;j<5;j++){const a=j*Math.PI*2/5;const lobe=sphere(Math.cos(a)*.105,.555,Math.sin(a)*.095,.105,.14,.10,fruit,7,'produce',.10+j*.012);lobe.rotation.z=Math.cos(a)*.12;}
+      sphere(0,.695,0,.073,.024,.067,mat('#69452a'),6,'detail',.25);
+      twig(0,.755,0,.13,.019,mat('#76502d'));
+      leafBlade(.12,.765,0,.095,.19,.035,.72,mat('#388846'));
+      sphere(.07,.47,.225,.055,.12,.018,mat('#ff9b62'),7,'detail',.34);
+      break;}
+    case 'grapes': {
+      // Individual grape spheres arranged in a tapered bunch, with branching stem and vine leaf.
+      twig(0,.79,0,.18,.018,mat('#805331'));
+      tube([[0,.78,0],[-.09,.70,.02],[-.13,.61,.02]],.014,stem,'stem',8);
+      tube([[0,.77,0],[.10,.69,-.01],[.13,.61,.015]],.014,stem,'stem',8);
+      leafBlade(-.16,.755,0,.13,.22,.035,.62,mat('#3d8b43'));
+      leafBlade(.15,.74,-.015,.12,.21,.035,-.55,mat('#2f7f3d'));
+      const rows=[[-.09,0,.073],[ -.15,-.065,.073],[-.05,-.065,.073],[.05,-.065,.073],[.15,-.065,.073],[-.105,-.19,.071],[0,-.19,.074],[.105,-.19,.071],[-.06,-.31,.066],[.06,-.31,.066],[0,-.42,.058]];
+      for(let j=0;j<rows.length;j++){const [x,dy,r]=rows[j];sphere(x,.60+dy,(j%2)*.035,r,r*1.02,r,fruit,7,'produce',.18+(j%5)*.025);}
+      break;}
+    case 'pineapple': {
+      // Oval golden fruit with a diamond-like textured rind and spiky leaf crown.
+      sphere(0,.435,0,.235,.325,.215,fruit,8,'produce',.08);
+      const scaleMats=[mat('#d7a536'),mat('#f4c14a'),mat('#b98528')];
+      for(let row=0;row<6;row++){
+        const y=.20+row*.085,dy=(y-.435)/.34,rf=Math.sqrt(Math.max(.12,1-dy*dy)),count= Math.max(4,Math.round(7*rf));
+        for(let j=0;j<count;j++){const a=(j+(row%2)*.5)*Math.PI*2/count;const x=Math.cos(a)*(.233*rf),z=Math.sin(a)*(.213*rf);
+          const scale=mesh(new THREE.OctahedronGeometry(.031,0),scaleMats[(j+row)%3],root,x,y,z);scale.scale.set(.9,1.15,.55);scale.rotation.y=a;register(scale,'detail',.30+(row%3)*.035);}
+      }
+      for(let j=0;j<9;j++){const a=j*Math.PI*2/9;const l=leafBlade(Math.cos(a)*.055,.75+(j%3)*.025,Math.sin(a)*.055,.045,.31+(j%2)*.04,.03,Math.cos(a)*.32,mat(j%2?'#287b3e':'#3b9a4a'));l.rotation.x=Math.sin(a)*.28;}
+      for(let j=0;j<3;j++){const l=leafBlade((j-1)*.025,.91,.01,.035,.25,.025,(j-1)*.18,darkLeaf);}
+      break;}
+    case 'chili': {
+      // Curved tapered chilli pepper, green cap and pointed end.
+      tube([[0,.70,0],[.10,.62,.005],[.14,.49,.02],[.12,.36,.035],[.025,.22,.045]],.055,fruit,'produce',14);
+      const tip=conePart(.015,.205,.045,.045,.13,fruit,7,'produce');tip.rotation.z=Math.PI-.2;
+      twig(-.015,.735,0,.15,.018,mat('#4b8033'));
+      for(let j=0;j<5;j++){const a=j*Math.PI*2/5;const l=leafBlade(Math.cos(a)*.045,.72,Math.sin(a)*.045,.027,.095,.02,Math.cos(a)*.5,darkLeaf);l.rotation.x=Math.sin(a)*.3;}
+      leafBlade(-.11,.72,.01,.075,.15,.028,-.55,leaf);
+      break;}
+    case 'onion': {
+      // Bulb onion with papery vertical layers and a dried root tuft.
+      sphere(0,.405,0,.245,.255,.225,fruit,9,'root',.12);
+      const skin=mat('#f0d9df');
+      for(let j=0;j<6;j++){const a=j*Math.PI/3;const pts=[];for(let k=0;k<=7;k++){const t=k/7;const y=.23+t*.36;const r=.20*Math.sin(Math.PI*(.10+t*.82));pts.push([Math.cos(a)*r,y,Math.sin(a)*r]);}tube(pts,.008,j%2?skin:mat('#c98bb1'),'detail',8);}
+      conePart(0,.63,0,.065,.12,mat('#cbb2a1'),6,'detail');
+      for(let j=0;j<4;j++){const a=j*Math.PI/2;const l=leafBlade(Math.cos(a)*.055,.72+(j%2)*.04,Math.sin(a)*.055,.04,.27,.027,Math.cos(a)*.22,darkLeaf);l.rotation.x=Math.sin(a)*.2;}
+      for(let j=0;j<4;j++){const a=j*Math.PI/2;tube([[Math.cos(a)*.04,.22,Math.sin(a)*.04],[Math.cos(a)*.06,.15,Math.sin(a)*.06],[Math.cos(a)*.03,.10,Math.sin(a)*.03]],.006,mat('#8d6d5b'),'detail',5);}
+      break;}
+    case 'potato': {
+      // Irregular earthy tuber, visible potato eyes and two small shoots.
+      const tuber=sphere(0,.355,0,.30,.205,.245,fruit,8,'root',.10);tuber.rotation.z=-.13;
+      const eyeMat=mat('#735338');
+      const eyes=[[-.19,.39,.11],[.12,.44,.19],[.22,.34,.06],[-.08,.28,.21],[.02,.47,-.12],[-.20,.34,-.06],[.12,.27,-.08]];
+      for(let j=0;j<eyes.length;j++){const [x,y,z]=eyes[j];sphere(x,y,z,.018,.014,.014,eyeMat,5,'detail',.34+(j%3)*.025);}
+      tube([[-.10,.48,.02],[-.15,.56,.02],[-.12,.62,.025]],.013,mat('#6a9f45'),'stem',6);
+      tube([[.12,.48,.04],[.18,.55,.045],[.23,.59,.05]],.012,mat('#75a94b'),'stem',6);
+      leafBlade(-.13,.65,.02,.055,.14,.027,-.5,darkLeaf);leafBlade(.23,.62,.05,.05,.13,.025,.55,leaf);
+      break;}
+    case 'beet': {
+      // Deep magenta beetroot with a pointed taproot, red veins and leafy tops.
+      sphere(0,.425,0,.255,.26,.235,fruit,8,'root',.12);
+      const tail=conePart(0,.205,0,.105,.29,fruit,8,'root');tail.rotation.z=Math.PI;
+      for(let j=0;j<5;j++){const a=j*Math.PI*2/5;const l=leafBlade(Math.cos(a)*.13,.68+(j%2)*.06,Math.sin(a)*.10,.06,.29,.034,Math.cos(a)*.48,darkLeaf);l.rotation.x=Math.sin(a)*.26;
+        tube([[0,.47,.20],[Math.cos(a)*.07,.54,.19],[Math.cos(a)*.13,.67,.14]],.006,mat('#a84a65'),'detail',7);}
+      break;}
+    case 'broccoli': {
+      // Thick pale stalk supports a dense, bumpy dome of small green florets.
+      twig(0,.36,0,.52,.075,mat('#85bd76'));
+      for(let j=0;j<5;j++){const a=j*Math.PI*2/5;const l=leafBlade(Math.cos(a)*.22,.29,Math.sin(a)*.20,.10,.22,.045,Math.cos(a)*.62,mat('#4f9a4b'));l.rotation.x=Math.sin(a)*.25;}
+      for(let j=0;j<24;j++){const a=j*2.399,r=.05+(j%5)*.045,y=.60+Math.sqrt(Math.max(.04,1-(r/.30)**2))*.14;
+        sphere(Math.cos(a)*r,y,Math.sin(a)*r,.075+(j%3)*.012,.075+(j%2)*.015,.072,mat(['#26883e','#359c4c','#4caf57'][j%3]),6,'produce',.16+(j%5)*.027);}
+      break;}
+    case 'pepper': {
+      // Bell pepper made of four distinct lobes, with a star-shaped calyx and stem.
+      sphere(0,.425,0,.225,.255,.205,fruit,8,'produce',.10);
+      for(let j=0;j<4;j++){const a=j*Math.PI/2;const lobe=sphere(Math.cos(a)*.105,.405,Math.sin(a)*.09,.115,.225,.105,fruit,7,'produce',.15+j*.012);lobe.rotation.z=Math.cos(a)*.10;}
+      for(let j=0;j<5;j++){const a=j*Math.PI*2/5;const l=leafBlade(Math.cos(a)*.055,.66,Math.sin(a)*.055,.035,.12,.022,Math.cos(a)*.6,darkLeaf);l.rotation.x=Math.sin(a)*.18;}
+      twig(0,.735,0,.13,.018,mat('#447d35'));
+      break;}
+    case 'lemon': {
+      // Bright oval lemon with tapered tips, pores and a small green leaf.
+      const body=sphere(0,.435,0,.285,.19,.185,fruit,9,'produce',.08);body.rotation.z=.035;
+      const left=conePart(-.265,.435,0,.062,.15,fruit,7,'produce');left.rotation.z=Math.PI/2;
+      const right=conePart(.265,.435,0,.062,.15,fruit,7,'produce');right.rotation.z=-Math.PI/2;
+      for(let j=0;j<18;j++){const a=j*2.399,y=.435+Math.sin(a)*.13,x=Math.cos(a)*.22,z=Math.cos(a*1.7)*.12;sphere(x,y,z,.008,.008,.008,mat('#ffe56b'),4,'detail',.31+(j%4)*.02);}
+      twig(0,.62,0,.10,.015,mat('#72502e'));leafBlade(.11,.66,0,.08,.17,.03,.72,darkLeaf);
+      break;}
+    case 'orange': {
+      // Round dimpled orange with a dark navel and a leaf at the stem.
+      sphere(0,.435,0,.255,.255,.25,fruit,10,'produce',.08);
+      const pore=mat('#ffc05b');
+      for(let j=0;j<34;j++){const u=-.78+((j*7)%17)*.097;const a=j*2.399;const rr=Math.sqrt(Math.max(.10,1-u*u));const x=Math.cos(a)*.252*rr,z=Math.sin(a)*.248*rr,y=.435+u*.253;sphere(x,y,z,.009,.009,.009,pore,4,'detail',.34+(j%4)*.02);}
+      sphere(0,.687,0,.045,.018,.045,mat('#c66b2a'),6,'detail');twig(0,.72,0,.08,.014,stem);leafBlade(.12,.73,0,.09,.17,.03,.68,darkLeaf);
+      break;}
+    case 'peach': {
+      // Soft peach with a recognizable central crease and warm blush.
+      sphere(0,.435,0,.265,.245,.24,fruit,9,'produce',.08);
+      sphere(.08,.47,.222,.095,.15,.018,mat('#f7bb74'),7,'detail',.28);
+      tube([[0,.665,.055],[.012,.57,.20],[0,.46,.242],[-.01,.34,.20],[0,.225,.06]],.008,mat('#b65d60'),'detail',9);
+      twig(0,.69,0,.11,.016,mat('#77502d'));leafBlade(.12,.70,0,.09,.17,.03,.64,darkLeaf);
+      break;}
+    case 'pear': {
+      // Classic pear silhouette: broad rounded base narrowing into a tall neck.
+      sphere(0,.335,0,.27,.235,.245,fruit,9,'produce',.06);
+      sphere(0,.515,0,.155,.205,.15,fruit,9,'produce',.16);
+      sphere(0,.675,0,.072,.085,.072,fruit,7,'produce',.24);
+      twig(0,.765,0,.11,.016,mat('#79512e'));leafBlade(.105,.77,0,.09,.17,.03,.65,mat('#3d8841'));
+      break;}
+    case 'blueberry': {
+      // Cluster of small blue berries, each with a dark, star-shaped crown.
+      const positions=[[-.11,.49,.02],[-.01,.57,.035],[.10,.49,.015],[-.17,.39,.035],[ -.055,.40,.08],[.07,.40,.065],[.16,.38,.02],[0,.29,.03]];
+      for(let j=0;j<positions.length;j++){const [x,y,z]=positions[j];sphere(x,y,z,.095,.095,.09,fruit,8,'produce',.16+(j%4)*.025);
+        sphere(x,y+.085,z,.025,.012,.025,mat('#2c477f'),5,'detail',.31);
+        for(let k=0;k<5;k++){const a=k*Math.PI*2/5;const s=sphere(x+Math.cos(a)*.018,y+.09,z+Math.sin(a)*.018,.009,.008,.009,mat('#90a2dc'),4,'detail',.34+(k%2)*.02);}
+      }
+      twig(0,.70,0,.16,.015,stem);leafBlade(-.13,.71,0,.11,.20,.03,-.52,darkLeaf);leafBlade(.13,.70,.01,.10,.19,.03,.5,leaf);
+      break;}
+    case 'cherry': {
+      // Two glossy red cherries on long, forked stems.
+      tube([[0,.79,0],[-.035,.69,.01],[-.095,.57,.025],[-.14,.50,.035]],.013,mat('#638344'),'stem',9);
+      tube([[0,.76,0],[.055,.67,-.015],[.105,.57,-.005],[.15,.50,.02]],.013,mat('#638344'),'stem',9);
+      sphere(-.14,.40,.04,.132,.145,.125,fruit,9,'produce',.18);
+      sphere(.15,.40,.025,.132,.145,.125,fruit,9,'produce',.24);
+      sphere(-.18,.455,.15,.025,.028,.012,mat('#ff8a8a'),5,'detail',.34);sphere(.11,.455,.14,.025,.028,.012,mat('#ff8a8a'),5,'detail',.37);
+      leafBlade(.04,.73,0,.08,.16,.03,.48,darkLeaf);
+      break;}
+    case 'mushroom': {
+      // Red-orange mushroom cap, cream stem, underside and pale cap spots.
+      const stemBody=cylinder(root,0,.32,0,.105,.135,.47,mat('#f3ead7'),8);register(stemBody,'stem');
+      sphere(0,.51,0,.24,.065,.23,mat('#e3d4ba'),9,'detail',.10);
+      sphere(0,.595,0,.30,.17,.285,fruit,9,'produce',.12);
+      for(let j=0;j<9;j++){const a=j*2.399,r=.20+(j%3)*.02;const x=Math.cos(a)*r,z=Math.sin(a)*r*.91,y=.68+((j%3)-1)*.025;sphere(x,y,z,.033,.025,.033,mat('#fff1d7'),5,'detail',.28+(j%3)*.025);}
+      break;}
+    case 'garlic': {
+      // Off-white garlic head with segmented cloves, papery seams and dried leaves.
+      sphere(0,.385,0,.225,.245,.205,fruit,8,'root',.10);
+      for(let j=0;j<6;j++){const a=j*Math.PI/3;const cl=sphere(Math.cos(a)*.105,.39,Math.sin(a)*.09,.09,.19,.082,mat(j%2?'#f6f0e4':'#e7dfd0'),7,'root',.16+j*.018);cl.rotation.z=Math.cos(a)*.09;}
+      conePart(0,.60,0,.07,.13,mat('#d9ccbb'),6,'root',.24);
+      for(let j=0;j<5;j++){const a=j*Math.PI*2/5;const l=leafBlade(Math.cos(a)*.06,.72+(j%2)*.04,Math.sin(a)*.055,.035,.28,.024,Math.cos(a)*.22,darkLeaf);l.rotation.x=Math.sin(a)*.2;}
+      for(let j=0;j<4;j++){const a=j*Math.PI/2;tube([[Math.cos(a)*.03,.19,Math.sin(a)*.03],[Math.cos(a)*.05,.13,Math.sin(a)*.05],[Math.cos(a)*.015,.09,Math.sin(a)*.015]],.005,mat('#9c8770'),'detail',5);}
+      break;}
+    case 'rice': {
+      // Several slender rice stalks with drooping panicles and clearly visible grains.
+      for(let j=0;j<7;j++){const x=(j-3)*.075,lean=(j-3)*.035;
+        tube([[x,.08,0],[x+lean*.2,.34,0],[x+lean,.63,0],[x+lean*1.35,.76,.015]],.012,stem,'stem',8);
+        for(let k=0;k<3;k++){const side=k-1;const pts=[[x+lean*.8,.61,0],[x+lean*1.0+side*.035,.68,.015],[x+lean*1.4+side*.07,.73-k*.045,.03]];tube(pts,.009,mat('#b4a34a'),'stem',5);
+          for(let g=0;g<3;g++){sphere(pts[2][0]+g*.012,.73-k*.045-g*.018,.045,.018,.035,.016,mat('#e7d17b'),5,'produce',.32+(k%2)*.03);}}
+        const l=leafBlade(x,.37,0,.035,.30,.022,(j-3)*.17,mat('#55a050'));l.rotation.x=(j%2?-.27:.27);
+      }break;}
+    case 'coffee': {
+      // Small coffee shrub with paired glossy leaves and red coffee cherries in clusters.
+      twig(0,.46,0,.70,.027,mat('#5c7f39'));
+      for(let j=0;j<6;j++){const side=j%2?1:-1,y=.30+j*.085;const l=leafBlade(side*.14,y,0,.07,.20,.032,side*.62,mat(j%3?'#328749':'#4d9e4f'));l.rotation.x=side*.22;}
+      const clusters=[[-.13,.38,.04],[.13,.44,.04],[-.12,.55,.03],[.12,.60,.03],[0,.48,.12]];
+      const ripeCherry=mat('#cf3245');for(let i=0;i<clusters.length;i++){const [x,y,z]=clusters[i];for(let k=0;k<3;k++){const a=k*Math.PI*2/3;sphere(x+Math.cos(a)*.045,y+(k%2)*.035,z+Math.sin(a)*.035,.047,.052,.045,ripeCherry,7,'produce',.20+(k%3)*.03);}}
+      break;}
+    case 'mango': {
+      // Elongated tilted mango with a warm red blush on one side and a short stem.
+      const body=sphere(0,.45,0,.205,.335,.18,fruit,9,'produce',.08);body.rotation.z=-.27;
+      const blush=sphere(-.08,.49,.145,.105,.205,.018,mat('#e86a48'),7,'detail',.25);blush.rotation.z=-.25;
+      sphere(.07,.48,.15,.05,.13,.012,mat('#f5c35c'),6,'detail',.32);
+      twig(0,.77,0,.11,.016,mat('#79512e'));leafBlade(.11,.78,0,.09,.18,.03,.7,darkLeaf);
+      break;}
+    case 'kiwi': {
+      // Whole fuzzy brown kiwi: oval profile, fine surface hairs and a small stem scar.
+      const body=sphere(0,.43,0,.225,.285,.19,mat('#8b674c'),9,'produce',.08);body.rotation.z=-.12;
+      const hair=mat('#b18a62');
+      for(let j=0;j<34;j++){const a=j*2.399;const u=-.83+((j*11)%17)*.098;const rr=Math.sqrt(Math.max(.12,1-u*u));const x=Math.cos(a)*.225*rr,z=Math.sin(a)*.19*rr,y=.43+u*.282;sphere(x,y,z,.008,.015,.008,hair,4,'detail',.31+(j%4)*.025);}
+      sphere(0,.708,0,.045,.018,.04,mat('#67462f'),6,'detail');
+      break;}
+    case 'wheat': {
+      for(let j=0;j<7;j++){const a=j*Math.PI*2/7,r=.04+(j%2)*.1,x=Math.cos(a)*r,z=Math.sin(a)*r;twig(x,.3,z,.6,.014);sphere(x,.66,z,.032,.13,.032,fruit,6,'produce');leafBlade(x,.4,z+.03,.02,.2,.012,.3+(j%3)*.15,leaf);}break;}
+    default: {
+      sphere(0,.45,0,.27,.27,.27,fruit,7,'produce',.18);crownLeaves(5,.70,.18);
+    }
+  }
+  // Capture authored transforms so all 31 models can animate individual leaves,
+  // stems, roots and edible parts without replacing their hand-built geometry.
+  for(const part of root.userData.cropParts){
+    part.userData.cropAnimation={
+      kind:part.userData.cropPartKind||'produce',
+      delay:part.userData.cropPartDelay||0,
+      baseScale:part.scale.clone(),
+      basePosition:part.position.clone(),
+      baseRotation:part.rotation.clone(),
+      phase:Math.random()*Math.PI*2
+    };
+  }
+  const motionMap={
+    tomato:{sway:.035,leaf:.16,fruit:.045},carrot:{sway:.018,leaf:.28,fruit:.025},cabbage:{sway:.014,leaf:.22,fruit:.035},
+    berry:{sway:.035,leaf:.20,fruit:.075},melon:{sway:.018,leaf:.12,fruit:.035},corn:{sway:.026,leaf:.32,fruit:.025},
+    pumpkin:{sway:.015,leaf:.16,fruit:.045},eggplant:{sway:.055,leaf:.19,fruit:.055},cucumber:{sway:.045,leaf:.20,fruit:.06},
+    banana:{sway:.065,leaf:.22,fruit:.055},apple:{sway:.035,leaf:.16,fruit:.05},grapes:{sway:.045,leaf:.19,fruit:.075},
+    pineapple:{sway:.025,leaf:.28,fruit:.025},chili:{sway:.06,leaf:.22,fruit:.06},onion:{sway:.018,leaf:.20,fruit:.02},
+    potato:{sway:.014,leaf:.15,fruit:.02},beet:{sway:.025,leaf:.28,fruit:.025},broccoli:{sway:.022,leaf:.20,fruit:.04},
+    pepper:{sway:.025,leaf:.16,fruit:.045},lemon:{sway:.038,leaf:.18,fruit:.045},orange:{sway:.028,leaf:.17,fruit:.04},
+    peach:{sway:.035,leaf:.18,fruit:.05},pear:{sway:.035,leaf:.17,fruit:.045},blueberry:{sway:.045,leaf:.20,fruit:.075},
+    cherry:{sway:.06,leaf:.18,fruit:.08},mushroom:{sway:.015,leaf:.03,fruit:.035},garlic:{sway:.018,leaf:.22,fruit:.02},
+    rice:{sway:.035,leaf:.36,fruit:.03},coffee:{sway:.03,leaf:.19,fruit:.06},mango:{sway:.045,leaf:.18,fruit:.05},kiwi:{sway:.035,leaf:.12,fruit:.04}
+  };
+  root.userData.cropMotion=motionMap[c.shape]||{sway:.03,leaf:.18,fruit:.04};
+  attachCropAction(root,plot,slotIndex);return root;
+}
+
+const HOUSE_UPGRADE_COST={2:300,3:800,4:1200,5:1800,6:2500,7:3500,8:4800,9:6500,10:8500,11:11000,12:14000,13:17500,14:21500,15:26000};
+function updateHUD(){
+  $('moneyValue').textContent=`${money.toLocaleString('en-US')} coins`;
+  $('inventoryValue').textContent=`${Object.values(inventory).reduce((a,b)=>a+b,0)} items`;
+  $('houseLevelValue').textContent=`Level ${houseLevel}/15`;
+  const total=Object.values(inventory).reduce((a,b)=>a+b,0);$('sellBtn').disabled=total===0;$('sellHint').textContent=total?`Sell ${total} items for coins`:'Grow crops to harvest';
+  $('seedList').innerHTML='';
+  for(const [key,c] of Object.entries(crops)){
+    if(c.product||c.island)continue;const unlocked=houseLevel>=c.unlockLevel&&(!c.island||bridgeBuilt);
+    const button=document.createElement('button');button.className='seedCard'+(selectedCrop===key?' selected':'')+(!unlocked?' locked':'');button.disabled=!unlocked;
+    button.innerHTML=`<div class="seedTop"><span class="seedName">${c.name} ${c.emoji}</span><span class="earn">Sell: +${c.sell.toLocaleString('en-US')} 🪙</span></div><div class="seedBottom"><span class="cost">Plant: -${c.cost.toLocaleString('en-US')} 🪙</span><span class="time">⏱ ${c.grow}s</span></div>${unlocked?'':`<div class="unlock">🔒 ${c.island&&houseLevel>=c.unlockLevel?'Build the bridge first':`Unlocks at house level ${c.unlockLevel}`}</div>`}`;
+    button.addEventListener('click',()=>{if(houseLevel<c.unlockLevel){toast(`Upgrade your house to level ${c.unlockLevel} to unlock ${c.name}`);return;}selectedCrop=key;updateHUD();playSound('select');toast(`${c.name} selected`);});$('seedList').appendChild(button);
+  }
+  const bList=$('buildList');bList.innerHTML='';
+  const exp=document.createElement('button');exp.className='buildCard';exp.disabled=unlockedPlots>=MAX_PLOTS||money<150;exp.innerHTML=`<div class="buildTop"><span class="buildName">Expand plots 🧱</span><span class="buildCost">-150 🪙</span></div><div class="buildDesc">Unlock plot ${Math.min(unlockedPlots+1,MAX_PLOTS)}/${MAX_PLOTS} · you own ${unlockedPlots} · 2 crops per plot</div>`;exp.addEventListener('click',buyExpansion);bList.appendChild(exp);
+  const nextLevel=houseLevel+1,upgradeCost=HOUSE_UPGRADE_COST[nextLevel];const cropUnlocks=Object.values(crops).filter(c=>c.unlockLevel===nextLevel).length;
+  const up=document.createElement('button');up.className='buildCard';up.disabled=houseLevel>=15||money<upgradeCost;up.innerHTML=`<div class="buildTop"><span class="buildName">Upgrade house 🏠</span><span class="buildCost">${houseLevel>=15?'MAX':`-${upgradeCost.toLocaleString('en-US')} 🪙`}</span></div><div class="buildDesc">${houseLevel>=15?'Max level reached':`Level ${houseLevel} → ${nextLevel} · unlocks ${cropUnlocks} new crops`}</div>`;up.addEventListener('click',buyHouseUpgrade);bList.appendChild(up);
+  const progression=document.createElement('div');progression.className='buildDesc';progression.style.cssText='padding:7px 4px 2px;line-height:1.6';progression.textContent=`Crops unlocked ${Object.values(crops).filter(c=>!c.product&&houseLevel>=c.unlockLevel).length}/${Object.values(crops).filter(c=>!c.product).length} crops`;bList.appendChild(progression);renderAnimalTab();updateSiloUI();
+}
+function showTab(tab){const m={seed:'seedList',build:'buildList',animal:'animalList'},t={seed:'seedTab',build:'buildTab',animal:'animalTab'};for(const k in m){$(m[k]).style.display=k===tab?'flex':'none';$(t[k]).classList.toggle('active',k===tab);}}
+$('animalTab').addEventListener('click',()=>showTab('animal'));
+$('seedTab').addEventListener('click',()=>showTab('seed'));$('buildTab').addEventListener('click',()=>showTab('build'));
+function spend(amount,x=0,z=0){if(money<amount){playSound('error');toast('Not enough coins! Harvest and sell some produce');floatText('Not enough coins!','#ff5b4c',x,GROUND+1.7,z);return false;}money-=amount;floatText(`-${amount} 🪙`,'#ef5346',x,GROUND+1.25,z);playSound('spend');updateHUD();return true;}
+function buyExpansion(){if(unlockedPlots>=MAX_PLOTS||!spend(150,2,1))return;const p=plots[unlockedPlots];if(!p)return;p.unlocked=true;p.group.visible=true;unlockedPlots++;updateHUD();playSound('build');toast(`Plot ${unlockedPlots}/${MAX_PLOTS} unlocked! 2 crops per plot`);floatText('New plot!','#18b968',p.x,GROUND+1.1,p.z);}
+function buyHouseUpgrade(){if(houseLevel>=15)return;const nextLevel=houseLevel+1,cost=HOUSE_UPGRADE_COST[nextLevel];if(!spend(cost,0,-5))return;houseLevel=nextLevel;createHouse(houseLevel);updateHUD();playSound('build');toast(`House upgraded to level ${houseLevel}! 2 new crops 🌱`);floatText(`House Lv.${houseLevel}!`,'#228dd0',0,GROUND+3,-5);}
+
+function disposeCropRoot(root){if(!root)return;scene.remove(root);root.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){if(Array.isArray(o.material))o.material.forEach(m=>m.dispose());else o.material.dispose();}});}
+function resetCropSlot(slot){disposeCropRoot(slot.plant);slot.plant=null;slot.crop=null;slot.growth=0;slot.ripe=false;slot.plantAge=0;slot.matureAge=0;slot.sprite.visible=false;slot.barClock=0;}
+function harvestSlot(slot){if(!slot?.plant||!slot.ripe)return false;const cropKey=slot.crop,name=crops[cropKey].name;if(crops[cropKey].island){const sx=slot.x,sz=slot.z;spawnCropReadyEffect(slot);resetCropSlot(slot);toSilo(cropKey,sx,sz);return true;}inventory[cropKey]++;spawnCropReadyEffect(slot);resetCropSlot(slot);updateHUD();playSound('harvest');floatText(`+1 ${name}`,'#21c875',slot.x,GROUND+1.5,slot.z);toast(`${name} harvested!`);return true;}
+function plantIntoSlot(plot,slot){const c=crops[selectedCrop];if(slot.plant)return false;if(plot.island===2&&!['wheat','corn'].includes(selectedCrop)){playSound('error');toast('Animal-island fields only grow wheat 🌾 and corn 🌽');return false;}if(plot.island!==2&&c.island){playSound('error');toast(`${c.name} only grows on the Animal Island`);return false;}const cost=Math.round(c.cost*(DEB[plot.island===2?2:1].cost>performance.now()/1000?1.12:1));if(!spend(cost,slot.x,slot.z))return false;slot.crop=selectedCrop;slot.growth=0;slot.ripe=false;slot.plantAge=0;slot.matureAge=0;slot.plant=createCropModel(selectedCrop,plot,slot.slotIndex);scene.add(slot.plant);slot.plant.scale.setScalar(.001);slot.plant.position.y=GROUND+.045;slot.plant.rotation.set(0,0,0);slot.sprite.visible=true;slot.barClock=0;drawProgress(slot);spawnPlantPuffs(slot);playSound('plant');floatText(`Planted ${c.name} 🌱`,'#19b96c',slot.x,GROUND+1.3,slot.z);updateHUD();return true;}
+function plantPlot(plot,targetSlotIndex=null){
+  if(!plot?.unlocked)return;
+  if(houseLevel<crops[selectedCrop].unlockLevel){toast(`Upgrade your house to level ${crops[selectedCrop].unlockLevel} to unlock this crop`);playSound('error');return;}
+  if(Number.isInteger(targetSlotIndex)){const slot=plot.slots[targetSlotIndex];if(!slot)return;if(slot.plant){if(slot.ripe){harvestSlot(slot);}else{playSound('error');toast(`${crops[slot.crop].name} is growing... ${Math.max(1,Math.ceil((1-slot.growth)*crops[slot.crop].grow))}s`);}return;}plantIntoSlot(plot,slot);return;}
+  // Soil clicks fill the first free side, allowing a second crop species in the same plot.
+  const empty=plot.slots.find(slot=>!slot.plant);if(empty){plantIntoSlot(plot,empty);return;}
+  const ripe=plot.slots.find(slot=>slot.ripe);if(ripe){harvestSlot(ripe);return;}
+  const growing=plot.slots.reduce((best,slot)=>!best||slot.growth>best.growth?slot:best,null);if(growing){playSound('error');toast(`Both crops are growing · ${crops[growing.crop].name} · ${Math.max(1,Math.ceil((1-growing.growth)*crops[growing.crop].grow))}s`);}
+}
+
+// Floating text mapped from world coordinates to screen coordinates.
+const floaters=[];
+function floatText(text,color,x,y,z){const el=document.createElement('div');el.className='floatText';el.textContent=text;el.style.color=color;document.body.appendChild(el);floaters.push({el,pos:new THREE.Vector3(x,y,z),life:1.15,max:1.15});}
+let toastTimer=null;function toast(message){const t=$('toast');t.textContent=message;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2300);}
+
+// Synth-generated SFX only; audio wakes up after the first user gesture.
+let audioReady=false,audioLoading=null,synth=null,chime=null,errorSynth=null;
+async function ensureAudio(){if(audioReady)return true;if(audioLoading)return audioLoading;audioLoading=(async()=>{try{if(!Tone)Tone=await import('https://cdn.jsdelivr.net/npm/tone@15.0.4/build/esm/index.js');await Tone.start();synth=new Tone.Synth({oscillator:{type:'triangle'},envelope:{attack:.006,decay:.10,sustain:.025,release:.12}}).toDestination();chime=new Tone.Synth({oscillator:{type:'sine'},envelope:{attack:.008,decay:.22,sustain:.025,release:.32}}).toDestination();errorSynth=new Tone.Synth({oscillator:{type:'square'},envelope:{attack:.008,decay:.10,sustain:0,release:.12}}).toDestination();audioReady=true;return true;}catch(e){audioLoading=null;return false;}})();return audioLoading;}
+function playSound(type){ensureAudio().then(ok=>{if(!ok)return;const now=Tone.now();try{if(type==='plant'){synth.triggerAttackRelease('C6','32n',now);synth.triggerAttackRelease('G6','16n',now+.055);synth.triggerAttackRelease('C7','32n',now+.105);}else if(type==='harvest'){chime.triggerAttackRelease('E6','16n',now);chime.triggerAttackRelease('A6','16n',now+.07);chime.triggerAttackRelease('C7','8n',now+.14);chime.triggerAttackRelease('E7','16n',now+.25);}else if(type==='ready'){chime.triggerAttackRelease('C6','16n',now);chime.triggerAttackRelease('E6','16n',now+.075);chime.triggerAttackRelease('G6','16n',now+.15);chime.triggerAttackRelease('C7','8n',now+.23);}else if(type==='error'){errorSynth.triggerAttackRelease('G3','8n',now);errorSynth.triggerAttackRelease('Eb3','8n',now+.1);}else if(type==='correct'){chime.triggerAttackRelease('G5','16n',now);chime.triggerAttackRelease('C6','16n',now+.08);chime.triggerAttackRelease('E6','8n',now+.16);}else if(type==='spend'){synth.triggerAttackRelease('E5','32n',now);}else if(type==='build'){chime.triggerAttackRelease('C5','16n',now);chime.triggerAttackRelease('E5','16n',now+.08);chime.triggerAttackRelease('G5','8n',now+.16);}else if(type==='select'){synth.triggerAttackRelease('A5','32n',now);}}catch(e){}});}
+
+// Expanded farming vocabulary quiz, reward and robot failure effect.
+// The robot now selects from a large farm-themed vocabulary bank.
+const farmVocabulary = [
+  ["Farm", "ฟาร์ม", "พื้นฐานฟาร์ม"],
+  ["Farmer", "เกษตรกร", "พื้นฐานฟาร์ม"],
+  ["Farmhouse", "บ้านไร่", "พื้นฐานฟาร์ม"],
+  ["Field", "ทุ่งเพาะปลูก", "พื้นฐานฟาร์ม"],
+  ["Garden", "สวน", "พื้นฐานฟาร์ม"],
+  ["Orchard", "สวนผลไม้", "พื้นฐานฟาร์ม"],
+  ["Greenhouse", "เรือนกระจก", "พื้นฐานฟาร์ม"],
+  ["Barn", "โรงนา", "พื้นฐานฟาร์ม"],
+  ["Shed", "โรงเก็บอุปกรณ์", "พื้นฐานฟาร์ม"],
+  ["Fence", "รั้ว", "พื้นฐานฟาร์ม"],
+  ["Gate", "ประตูรั้ว", "พื้นฐานฟาร์ม"],
+  ["Pond", "สระน้ำ", "พื้นฐานฟาร์ม"],
+  ["Well", "บ่อน้ำ", "พื้นฐานฟาร์ม"],
+  ["Soil", "ดิน", "พื้นฐานฟาร์ม"],
+  ["Mud", "โคลน", "พื้นฐานฟาร์ม"],
+  ["Compost", "ปุ๋ยหมัก", "พื้นฐานฟาร์ม"],
+  ["Fertilizer", "ปุ๋ย", "พื้นฐานฟาร์ม"],
+  ["Seed", "เมล็ดพันธุ์", "พืชและการเติบโต"],
+  ["Seedling", "ต้นกล้า", "พืชและการเติบโต"],
+  ["Sprout", "หน่ออ่อน", "พืชและการเติบโต"],
+  ["Root", "ราก", "พืชและการเติบโต"],
+  ["Stem", "ลำต้น", "พืชและการเติบโต"],
+  ["Leaf", "ใบไม้", "พืชและการเติบโต"],
+  ["Flower", "ดอกไม้", "พืชและการเติบโต"],
+  ["Fruit", "ผลไม้", "พืชและการเติบโต"],
+  ["Vegetable", "ผัก", "พืชและการเติบโต"],
+  ["Crop", "พืชผล", "พืชและการเติบโต"],
+  ["Weed", "วัชพืช", "พืชและการเติบโต"],
+  ["Grass", "หญ้า", "พืชและการเติบโต"],
+  ["Hay", "หญ้าแห้ง", "พืชและการเติบโต"],
+  ["Straw", "ฟาง", "พืชและการเติบโต"],
+  ["Pollen", "ละอองเกสร", "พืชและการเติบโต"],
+  ["Bud", "ตาดอก", "พืชและการเติบโต"],
+  ["Branch", "กิ่งไม้", "พืชและการเติบโต"],
+  ["Trunk", "ลำต้นไม้", "พืชและการเติบโต"],
+  ["Harvest", "เก็บเกี่ยว", "งานในฟาร์ม"],
+  ["Water", "น้ำ", "งานในฟาร์ม"],
+  ["Watering", "การรดน้ำ", "งานในฟาร์ม"],
+  ["Sow", "หว่านเมล็ด", "งานในฟาร์ม"],
+  ["Dig", "ขุด", "งานในฟาร์ม"],
+  ["Plow", "ไถนา", "งานในฟาร์ม"],
+  ["Prune", "ตัดแต่งกิ่ง", "งานในฟาร์ม"],
+  ["Pick", "เด็ดผลผลิต", "งานในฟาร์ม"],
+  ["Grow", "เติบโต", "งานในฟาร์ม"],
+  ["Bloom", "ออกดอก", "งานในฟาร์ม"],
+  ["Ripen", "ทำให้สุก", "งานในฟาร์ม"],
+  ["Ripe", "สุกพร้อมเก็บ", "งานในฟาร์ม"],
+  ["Wilt", "เหี่ยวเฉา", "งานในฟาร์ม"],
+  ["Spray", "พ่น", "งานในฟาร์ม"],
+  ["Feed", "ให้อาหารสัตว์", "งานในฟาร์ม"],
+  ["Milk (verb)", "รีดนม", "งานในฟาร์ม"],
+  ["Collect eggs", "เก็บไข่", "งานในฟาร์ม"],
+  ["Sell", "ขาย", "งานในฟาร์ม"],
+  ["Buy", "ซื้อ", "งานในฟาร์ม"],
+  ["Irrigation", "ระบบชลประทาน", "งานในฟาร์ม"],
+  ["Watering can", "บัวรดน้ำ", "เครื่องมือ"],
+  ["Shovel", "พลั่ว", "เครื่องมือ"],
+  ["Hoe", "จอบ", "เครื่องมือ"],
+  ["Rake", "คราด", "เครื่องมือ"],
+  ["Spade", "เสียม", "เครื่องมือ"],
+  ["Scythe", "เคียวด้ามยาว", "เครื่องมือ"],
+  ["Axe", "ขวาน", "เครื่องมือ"],
+  ["Wheelbarrow", "รถเข็น", "เครื่องมือ"],
+  ["Tractor", "รถแทรกเตอร์", "เครื่องมือ"],
+  ["Seed packet", "ซองเมล็ดพันธุ์", "เครื่องมือ"],
+  ["Gardening gloves", "ถุงมือทำสวน", "เครื่องมือ"],
+  ["Boots", "รองเท้าบูต", "เครื่องมือ"],
+  ["Basket", "ตะกร้า", "เครื่องมือ"],
+  ["Bucket", "ถังน้ำ", "เครื่องมือ"],
+  ["Sprinkler", "เครื่องพ่นน้ำ", "เครื่องมือ"],
+  ["Pump", "ปั๊มน้ำ", "เครื่องมือ"],
+  ["Sickle", "เคียวเกี่ยวข้าว", "เครื่องมือ"],
+  ["Trowel", "พลั่วมือ", "เครื่องมือ"],
+  ["Pruning shears", "กรรไกรตัดกิ่ง", "เครื่องมือ"],
+  ["Rope", "เชือก", "เครื่องมือ"],
+  ["Cart", "รถลาก", "เครื่องมือ"],
+  ["Lantern", "ตะเกียง", "เครื่องมือ"],
+  ["Tomato", "มะเขือเทศ", "ผักและผลไม้"],
+  ["Carrot", "แครอท", "ผักและผลไม้"],
+  ["Cabbage", "กะหล่ำปลี", "ผักและผลไม้"],
+  ["Strawberry", "สตรอว์เบอร์รี", "ผักและผลไม้"],
+  ["Watermelon", "แตงโม", "ผักและผลไม้"],
+  ["Corn", "ข้าวโพด", "ผักและผลไม้"],
+  ["Pumpkin", "ฟักทอง", "ผักและผลไม้"],
+  ["Eggplant", "มะเขือม่วง", "ผักและผลไม้"],
+  ["Cucumber", "แตงกวา", "ผักและผลไม้"],
+  ["Banana", "กล้วย", "ผักและผลไม้"],
+  ["Apple", "แอปเปิล", "ผักและผลไม้"],
+  ["Grape", "องุ่น", "ผักและผลไม้"],
+  ["Pineapple", "สับปะรด", "ผักและผลไม้"],
+  ["Chili pepper", "พริก", "ผักและผลไม้"],
+  ["Onion", "หอมหัวใหญ่", "ผักและผลไม้"],
+  ["Potato", "มันฝรั่ง", "ผักและผลไม้"],
+  ["Sweet potato", "มันเทศ", "ผักและผลไม้"],
+  ["Garlic", "กระเทียม", "ผักและผลไม้"],
+  ["Broccoli", "บรอกโคลี", "ผักและผลไม้"],
+  ["Bell pepper", "พริกหวาน", "ผักและผลไม้"],
+  ["Lemon", "เลมอน", "ผักและผลไม้"],
+  ["Orange", "ส้ม", "ผักและผลไม้"],
+  ["Peach", "ลูกพีช", "ผักและผลไม้"],
+  ["Pear", "ลูกแพร์", "ผักและผลไม้"],
+  ["Blueberry", "บลูเบอร์รี", "ผักและผลไม้"],
+  ["Cherry", "เชอร์รี", "ผักและผลไม้"],
+  ["Mushroom", "เห็ด", "ผักและผลไม้"],
+  ["Rice", "ข้าว", "ผักและผลไม้"],
+  ["Wheat", "ข้าวสาลี", "ผักและผลไม้"],
+  ["Lettuce", "ผักกาดหอม", "ผักและผลไม้"],
+  ["Spinach", "ผักโขม", "ผักและผลไม้"],
+  ["Pea", "ถั่วลันเตา", "ผักและผลไม้"],
+  ["Bean", "ถั่ว", "ผักและผลไม้"],
+  ["Radish", "หัวไชเท้า", "ผักและผลไม้"],
+  ["Beetroot", "บีตรูต", "ผักและผลไม้"],
+  ["Cauliflower", "กะหล่ำดอก", "ผักและผลไม้"],
+  ["Mango", "มะม่วง", "ผักและผลไม้"],
+  ["Kiwi", "กีวี", "ผักและผลไม้"],
+  ["Coconut", "มะพร้าว", "ผักและผลไม้"],
+  ["Papaya", "มะละกอ", "ผักและผลไม้"],
+  ["Lime", "มะนาว", "ผักและผลไม้"],
+  ["Dragon fruit", "แก้วมังกร", "ผักและผลไม้"],
+  ["Guava", "ฝรั่ง", "ผักและผลไม้"],
+  ["Jackfruit", "ขนุน", "ผักและผลไม้"],
+  ["Lychee", "ลิ้นจี่", "ผักและผลไม้"],
+  ["Longan", "ลำไย", "ผักและผลไม้"],
+  ["Durian", "ทุเรียน", "ผักและผลไม้"],
+  ["Rambutan", "เงาะ", "ผักและผลไม้"],
+  ["Mangosteen", "มังคุด", "ผักและผลไม้"],
+  ["Avocado", "อะโวคาโด", "ผักและผลไม้"],
+  ["Cocoa", "โกโก้", "ผักและผลไม้"],
+  ["Coffee bean", "เมล็ดกาแฟ", "ผักและผลไม้"],
+  ["Sunflower", "ทานตะวัน", "ผักและผลไม้"],
+  ["Oat", "ข้าวโอ๊ต", "ผักและผลไม้"],
+  ["Barley", "ข้าวบาร์เลย์", "ผักและผลไม้"],
+  ["Peanut", "ถั่วลิสง", "ผักและผลไม้"],
+  ["Chives", "กุยช่าย", "ผักและผลไม้"],
+  ["Asparagus", "หน่อไม้ฝรั่ง", "ผักและผลไม้"],
+  ["Zucchini", "ซูกินี", "ผักและผลไม้"],
+  ["Celery", "ขึ้นฉ่าย", "ผักและผลไม้"],
+  ["Kale", "เคล", "ผักและผลไม้"],
+  ["Okra", "กระเจี๊ยบเขียว", "ผักและผลไม้"],
+  ["Corn stalk", "ต้นข้าวโพด", "ผักและผลไม้"],
+  ["Pumpkin vine", "เถาฟักทอง", "ผักและผลไม้"],
+  ["Cow", "วัว", "สัตว์ในฟาร์ม"],
+  ["Bull", "วัวตัวผู้", "สัตว์ในฟาร์ม"],
+  ["Calf", "ลูกวัว", "สัตว์ในฟาร์ม"],
+  ["Chicken", "ไก่", "สัตว์ในฟาร์ม"],
+  ["Rooster", "ไก่ตัวผู้", "สัตว์ในฟาร์ม"],
+  ["Hen", "แม่ไก่", "สัตว์ในฟาร์ม"],
+  ["Chick", "ลูกไก่", "สัตว์ในฟาร์ม"],
+  ["Pig", "หมู", "สัตว์ในฟาร์ม"],
+  ["Piglet", "ลูกหมู", "สัตว์ในฟาร์ม"],
+  ["Sheep", "แกะ", "สัตว์ในฟาร์ม"],
+  ["Lamb", "ลูกแกะ", "สัตว์ในฟาร์ม"],
+  ["Goat", "แพะ", "สัตว์ในฟาร์ม"],
+  ["Horse", "ม้า", "สัตว์ในฟาร์ม"],
+  ["Foal", "ลูกม้า", "สัตว์ในฟาร์ม"],
+  ["Duck", "เป็ด", "สัตว์ในฟาร์ม"],
+  ["Duckling", "ลูกเป็ด", "สัตว์ในฟาร์ม"],
+  ["Goose", "ห่าน", "สัตว์ในฟาร์ม"],
+  ["Rabbit", "กระต่าย", "สัตว์ในฟาร์ม"],
+  ["Bee", "ผึ้ง", "สัตว์ในฟาร์ม"],
+  ["Beehive", "รังผึ้ง", "สัตว์ในฟาร์ม"],
+  ["Farm dog", "สุนัขเฝ้าฟาร์ม", "สัตว์ในฟาร์ม"],
+  ["Cat", "แมว", "สัตว์ในฟาร์ม"],
+  ["Milk (noun)", "นม", "ผลผลิตจากฟาร์ม"],
+  ["Egg", "ไข่", "ผลผลิตจากฟาร์ม"],
+  ["Honey", "น้ำผึ้ง", "ผลผลิตจากฟาร์ม"],
+  ["Wool", "ขนแกะ", "ผลผลิตจากฟาร์ม"],
+  ["Grain", "ธัญพืช", "ผลผลิตจากฟาร์ม"],
+  ["Animal feed", "อาหารสัตว์", "ผลผลิตจากฟาร์ม"],
+  ["Sunlight", "แสงแดด", "ธรรมชาติและอากาศ"],
+  ["Rain", "ฝน", "ธรรมชาติและอากาศ"],
+  ["Cloud", "เมฆ", "ธรรมชาติและอากาศ"],
+  ["Wind", "ลม", "ธรรมชาติและอากาศ"],
+  ["Drought", "ภัยแล้ง", "ธรรมชาติและอากาศ"],
+  ["Season", "ฤดูกาล", "ธรรมชาติและอากาศ"],
+  ["Moisture", "ความชื้น", "ธรรมชาติและอากาศ"],
+  ["Pest", "แมลงศัตรูพืช", "ธรรมชาติและอากาศ"],
+  ["Ladybug", "เต่าทอง", "ธรรมชาติและอากาศ"],
+  ["Earthworm", "ไส้เดือน", "ธรรมชาติและอากาศ"],
+  ["Butterfly", "ผีเสื้อ", "ธรรมชาติและอากาศ"],
+  ["Bird", "นก", "ธรรมชาติและอากาศ"],
+  ["Nest", "รังนก", "ธรรมชาติและอากาศ"],
+  ["Shade", "ร่มเงา", "ธรรมชาติและอากาศ"],
+  ["Mountain", "ภูเขา", "ธรรมชาติและอากาศ"],
+  ["River", "แม่น้ำ", "ธรรมชาติและอากาศ"],
+  ["Island", "เกาะ", "ธรรมชาติและอากาศ"],
+  ["Ocean", "มหาสมุทร", "ธรรมชาติและอากาศ"],
+  ["Milk", "นม", "สัตว์ในฟาร์ม"],
+  ["Bridge", "สะพาน", "ธรรมชาติและอากาศ"],
+  ["Coop", "เล้าไก่", "พื้นฐานฟาร์ม"],
+  ["Collect", "เก็บรวบรวม", "พื้นฐานฟาร์ม"]
+];
+function buildQuizOptions(correctAnswer){
+  const alternatives = [...new Set(farmVocabulary.map(item=>item[1]))].filter(answer=>answer!==correctAnswer);
+  for(let i=alternatives.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[alternatives[i],alternatives[j]]=[alternatives[j],alternatives[i]];}
+  return [correctAnswer,...alternatives.slice(0,3)];
+}
+const questions = farmVocabulary.map(([word,answer,category])=>({
+  word, answer, category,
+  question:`${word} แปลว่าอะไร?`,
+  options:buildQuizOptions(answer)
+}));
+let currentQuestion=null,quizAnswered=false,buffEnd=0,brokenEnd=0,robotHappyEnd=0,lastSignSec=-1;
+$('closeModal').addEventListener('click',()=>{$('modalWrap').classList.remove('open');});
+// Particle effects: rising smoke, water droplets, and falling sparks.
+const particles=[];
+function addParticle(type,pos,velocity,life=1,scale=.1){let geo,material;if(type==='smoke'){geo=new THREE.IcosahedronGeometry(scale,0);material=new THREE.MeshStandardMaterial({color:'#e6f6ff',transparent:true,opacity:.62,roughness:1,flatShading:true,depthWrite:false});}else if(type==='water'){geo=new THREE.SphereGeometry(scale,6,5);material=new THREE.MeshStandardMaterial({color:'#8ce8ff',emissive:'#228eb9',emissiveIntensity:.35,transparent:true,opacity:.95,roughness:.2});}else if(type==='growth'||type==='harvest'){geo=type==='harvest'?new THREE.OctahedronGeometry(scale,0):new THREE.TetrahedronGeometry(scale,0);const color=type==='harvest'?['#ffe45e','#fff5b5','#a9f56c'][Math.floor(Math.random()*3)]:['#71e56f','#bcf58c','#fff09a'][Math.floor(Math.random()*3)];material=new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.3,transparent:true,opacity:.95,roughness:.35,flatShading:true});}else{geo=new THREE.TetrahedronGeometry(scale,0);material=new THREE.MeshStandardMaterial({color:Math.random()>.5?'#ffb328':'#ff613f',emissive:'#ff3e13',emissiveIntensity:.4,flatShading:true});}
+ const m=new THREE.Mesh(geo,material);m.position.copy(pos);m.castShadow=false;scene.add(m);particles.push({mesh:m,type,velocity:velocity.clone(),life,maxLife:life,material});}
+function spawnSparks(pos,count){for(let i=0;i<count;i++){const v=new THREE.Vector3((Math.random()-.5)*4,1+Math.random()*4,(Math.random()-.5)*4);addParticle('spark',pos.clone().add(new THREE.Vector3((Math.random()-.5)*.4,.2,(Math.random()-.5)*.4)),v,.6+Math.random()*.9,.055+Math.random()*.035);}}
+function spawnPlantPuffs(plot){for(let i=0;i<6;i++){const a=Math.random()*Math.PI*2,r=.08+Math.random()*.18;const pos=new THREE.Vector3(plot.x+Math.cos(a)*r,GROUND+.25,plot.z+Math.sin(a)*r);const v=new THREE.Vector3((Math.random()-.5)*.8,.55+Math.random()*.75,(Math.random()-.5)*.8);addParticle('growth',pos,v,.42+Math.random()*.25,.035+Math.random()*.025);}}
+function spawnCropReadyEffect(plot){for(let i=0;i<10;i++){const a=Math.random()*Math.PI*2,r=.18+Math.random()*.3;const pos=new THREE.Vector3(plot.x+Math.cos(a)*r,GROUND+.72+Math.random()*.32,plot.z+Math.sin(a)*r);const v=new THREE.Vector3((Math.random()-.5)*1.2,.45+Math.random()*1.15,(Math.random()-.5)*1.2);addParticle('harvest',pos,v,.55+Math.random()*.4,.035+Math.random()*.035);}}
+function updateParticles(dt,time){
+  // Regular chimney smoke puffs.
+  if(Math.random()<.13){const p=chimneyPoint.clone().add(new THREE.Vector3((Math.random()-.5)*.2,0,(Math.random()-.5)*.2));addParticle('smoke',p,new THREE.Vector3((Math.random()-.5)*.13,.65+Math.random()*.28,(Math.random()-.5)*.13),1.7+Math.random()*.7,.16+Math.random()*.09);}
+  if(Math.random()<.55){for(const plot of plots){if(!plot.unlocked||(plot.island===2?buff2End:buffEnd)<=time)continue;for(const slot of plot.slots){if(slot.plant&&Math.random()<.16){const pos=new THREE.Vector3(slot.x+(Math.random()-.5)*.28,GROUND+1.65+Math.random()*.5,slot.z+(Math.random()-.5)*.3);addParticle('water',pos,new THREE.Vector3((Math.random()-.5)*.25,-1.8-Math.random(),(Math.random()-.5)*.25),.65,.045);}}}}
+  for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.life-=dt;p.velocity.y+=p.type==='smoke'?.12:p.type==='water'?-1.9:(p.type==='growth'||p.type==='harvest')?-.9:-5.2;p.mesh.position.addScaledVector(p.velocity,dt);if(p.type==='smoke'){const k=1-dt*.6;p.mesh.scale.multiplyScalar(Math.max(.95,k));p.material.opacity=Math.max(0,.62*(p.life/p.maxLife));p.mesh.rotation.y+=dt*.35;}else if(p.type==='spark'){p.mesh.rotation.x+=dt*8;p.mesh.rotation.z+=dt*5;}else {p.mesh.scale.multiplyScalar(p.type==='harvest'?Math.max(.96,1+dt*.45):.99);p.material.opacity=Math.max(0,.95*(p.life/p.maxLife));if(p.type==='growth'||p.type==='harvest'){p.mesh.rotation.x+=dt*4;p.mesh.rotation.z+=dt*3;}}
+    if(p.life<=0||(p.type!=='smoke'&&p.mesh.position.y<GROUND+.1)){scene.remove(p.mesh);p.mesh.geometry.dispose();p.material.dispose();particles.splice(i,1);}}
+}
+
+// Click picking. A brief drag of OrbitControls does not plant anything.
+function findAction(obj){let o=obj;while(o){if(o.userData&&o.userData.action)return o.userData;o=o.parent;}return null;}
+renderer.domElement.addEventListener('pointerdown',e=>{pointerStart={x:e.clientX,y:e.clientY};});
+renderer.domElement.addEventListener('pointerup',e=>{if(!pointerStart)return;const moved=Math.hypot(e.clientX-pointerStart.x,e.clientY-pointerStart.y);pointerStart=null;if(moved>5)return;if($('modalWrap').classList.contains('open'))return;
+  pointer.x=(e.clientX/innerWidth)*2-1;pointer.y=-(e.clientY/innerHeight)*2+1;raycaster.setFromCamera(pointer,camera);const hits=raycaster.intersectObjects(scene.children,true);for(const hit of hits){const action=findAction(hit.object);if(action?.action==='crop'){const p=plots[action.plotIndex];if(p&&p.unlocked){plantPlot(p,action.slotIndex);return;}}if(action?.action==='plot'){const p=plots[action.plotIndex];if(p&&p.unlocked){plantPlot(p);return;}}if(action?.action==='animal'){tapAnimal(animals[action.animalIndex]);return;}if(action?.action==='scarecrow'){openQuiz(2);return;}if(action?.action==='robot'){openQuiz(1);return;}}
+});
+robotBody.traverse(o=>{if(o.isMesh)o.userData.action='robot';});robotHit.userData.action='robot';
+// Make keyboard shortcut usable as well as clicking the robot model.
+window.addEventListener('keydown',e=>{if(e.key==='Escape')$('modalWrap').classList.remove('open');if(e.key.toLowerCase()==='q')openQuiz(controls.target.x>20?2:1);});
+
+// Per-part growth stages make every crop (all 31 types) visibly sprout, unfold,
+// develop its edible parts, sway with the breeze, and celebrate when mature.
+function smooth01(a,b,v){const t=THREE.MathUtils.clamp((v-a)/(b-a),0,1);return t*t*(3-2*t);}
+function animateCropParts(plot,now){
+  const root=plot.plant;if(!root)return;
+  const profile=root.userData.cropMotion||{sway:.03,leaf:.18,fruit:.04};
+  const g=plot.growth;
+  for(const part of (root.userData.cropParts||[])){
+    const a=part.userData.cropAnimation;if(!a)continue;
+    let stage=1;
+    if(!plot.ripe){
+      if(a.kind==='stem')stage=smooth01(0.005,.30+a.delay*.25,g);
+      else if(a.kind==='leaf')stage=smooth01(.015,.38+a.delay*.5,g);
+      else if(a.kind==='root')stage=smooth01(.08,.82+a.delay*.25,g);
+      else if(a.kind==='detail')stage=smooth01(.30+a.delay,.91+a.delay*.25,g);
+      else stage=smooth01(.17+a.delay,.83+a.delay*.65,g);
+    }
+    let motionScale=1;
+    if(a.kind==='produce'&&plot.ripe)motionScale=1+Math.sin(now*4.2+a.phase)*profile.fruit;
+    else if(a.kind==='produce')motionScale=1+Math.sin(now*2.4+a.phase)*.014*g;
+    part.scale.copy(a.baseScale).multiplyScalar(Math.max(.012,stage*motionScale));
+    part.position.copy(a.basePosition);
+    const wind=plot.ripe?1:(.18+.82*g);
+    if(a.kind==='leaf'){
+      part.rotation.set(
+        a.baseRotation.x+Math.sin(now*2.2+a.phase)*profile.leaf*.24*wind,
+        a.baseRotation.y+Math.cos(now*1.7+a.phase)*profile.leaf*.15*wind,
+        a.baseRotation.z+Math.sin(now*2.0+a.phase)*profile.leaf*wind
+      );
+    }else if(a.kind==='stem'){
+      part.rotation.set(a.baseRotation.x+Math.sin(now*1.7+a.phase)*profile.sway*.25*wind,
+        a.baseRotation.y,
+        a.baseRotation.z+Math.sin(now*1.55+a.phase)*profile.sway*.45*wind);
+    }else{
+      part.rotation.copy(a.baseRotation);
+      if(a.kind==='produce'&&stage>.25){
+        part.position.y+=Math.sin(now*2.7+a.phase)*(plot.ripe?.022:.012*g);
+        part.rotation.z+=Math.sin(now*1.8+a.phase)*profile.sway*.18*wind;
+      }
+    }
+  }
+  const sw=plot.ripe?1:(.2+.8*g);
+  root.rotation.y=Math.sin(now*.92+plot.index*.83)*profile.sway*.75*sw;
+  root.rotation.z=Math.sin(now*1.45+plot.index*.91)*profile.sway*sw;
+  root.rotation.x=Math.cos(now*1.2+plot.index*.7)*profile.sway*.34*sw;
+}
+
+// ===== Animal Island: bridge, coop, barn, wheat & corn plots =====
+const X0=37.5,BRIDGE_COST=600,BRIDGE_LEVEL=5,wx=lx=>X0+lx;let bridgeBuilt=false;controls.maxTargetRadius=70;scene.add(sun.target);
+cylinder(scene,X0,-.5,0,14.4,13.3,1.24,mats.sand,28);cylinder(scene,X0,.47,0,15.5,14.4,.7,mats.sandLight,28);cylinder(scene,X0,1.1,0,16.5,15.5,.56,mats.grass,28);
+const disk2=mesh(new THREE.CircleGeometry(16.5,56),mats.grass,scene,X0,GROUND,0);disk2.rotation.x=-Math.PI/2;disk2.castShadow=false;
+const under2=mesh(new THREE.SphereGeometry(15.6,22,9),underMat,scene,X0,-.65,0);under2.scale.y=.18;under2.castShadow=false;
+function makeLabel(text,x,y,z,sc=1){const c=document.createElement('canvas');c.width=384;c.height=110;const g=c.getContext('2d');g.fillStyle='rgba(40,60,76,.88)';g.beginPath();g.roundRect(6,6,372,98,26);g.fill();g.strokeStyle='#f5c62c';g.lineWidth=7;g.stroke();g.font='bold 50px Kanit, sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillStyle='#fff';g.fillText(text,192,58);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;const s=new THREE.Sprite(new THREE.SpriteMaterial({map:t,transparent:true}));s.scale.set(1.9*sc,.54*sc,1);s.position.set(x,y,z);scene.add(s);return s;}
+// Bridge (hidden until purchased)
+const bridge=new THREE.Group();scene.add(bridge);bridge.visible=false;
+for(let x=14.6;x<22.3;x+=.42)box(bridge,x,GROUND+.1,0,.34,.12,2.0,mats.woodTop);
+for(const s of [-1,1]){box(bridge,18.4,GROUND+.78,s*.95,7.8,.08,.08,mats.wood);box(bridge,18.4,GROUND+.45,s*.95,7.8,.07,.07,mats.wood);for(let x=14.8;x<=22.2;x+=1.85)box(bridge,x,GROUND+.5,s*.95,.1,.8,.1,mats.wood);for(const px of [16.4,20.4])cylinder(bridge,px,.5,s*.8,.16,.2,1.9,mats.wood,6);}
+const bridgeSign=makeLabel('🚧 Bridge',18.3,GROUND+1.7,0);
+// Fenced pens, barn and coop
+function fenceRect(G,x1,z1,x2,z2){const rail=(ax,az,bx,bz)=>{const L=Math.hypot(bx-ax,bz-az),ang=Math.atan2(bz-az,bx-ax);for(const y of [.35,.65]){const r=box(G,(ax+bx)/2,GROUND+y,(az+bz)/2,L,.07,.07,mats.woodTop);r.rotation.y=-ang;}const n=Math.round(L/1.3);for(let i=0;i<=n;i++)box(G,ax+(bx-ax)*i/n,GROUND+.4,az+(bz-az)*i/n,.1,.8,.1,mats.wood);};rail(x1,z1,x2,z1);rail(x2,z1,x2,z2);rail(x2,z2,x1,z2);rail(x1,z2,x1,z1);}
+
+const penG={coop:new THREE.Group(),barn:new THREE.Group()};scene.add(penG.coop,penG.barn);
+const SLOT={coop:[[.6,6.6,1.4,6.4],[7,13,1.4,6.4],[.6,6.6,6.8,11.6]],barn:[[.6,6.6,-6.4,-1.4],[7,13,-6.4,-1.4],[.6,6.6,-11.6,-6.8]]},penN={coop:1,barn:1};let fieldPlots=4;const penB={coop:[],barn:[]};let diff='normal',onlineOthers=null;
+const barn=new THREE.Group();barn.position.set(wx(5),0,-6.5);scene.add(barn);box(barn,0,GROUND+.9,0,3.2,1.8,2.2,mat('#d9443b'));const bRoof=cone(barn,0,GROUND+2.25,0,2.5,1.2,mat('#7d4a2a'),4);bRoof.rotation.y=Math.PI/4;bRoof.scale.z=.75;box(barn,0,GROUND+.6,1.12,1.0,1.2,.06,mat('#f4f0df'));
+const coop=new THREE.Group();coop.position.set(wx(5),0,6.5);scene.add(coop);box(coop,0,GROUND+.6,0,2.0,1.2,1.5,mat('#c98a4b'));const cRoof=cone(coop,0,GROUND+1.5,0,1.7,.8,mat('#b5472f'),4);cRoof.rotation.y=Math.PI/4;cRoof.scale.z=.8;box(coop,0,GROUND+.45,-.76,.4,.45,.05,mat('#5a3a22'));
+for(const [lx,lz] of [[-1,-3.5],[-1.2,3.4]]){const h=cylinder(scene,wx(lx),GROUND+.3,lz,.35,.35,.7,mat('#e0c35a'),10);h.rotation.z=Math.PI/2;}
+makeTree(wx(-9.5),3,1);makeTree(wx(-8),8,.9);makeTree(wx(9.8),0,.9);makeTree(wx(-2),10.3,.8);
+makeLabel('🌾 Field',wx(-6.75),GROUND+2.3,-8.8);const lblBarn=makeLabel('🐄 Barn',wx(5),GROUND+3.5,-6.5),lblCoop=makeLabel('🐔 Coop',wx(5),GROUND+2.6,6.5);
+// Wheat & corn plots (2 slots each, unlocked with the bridge)
+const plots2=[];for(let k=0;k<18;k++){const p=makePlot(46+k,{row:Math.floor(k/3),col:k%3,x:wx(-8.4+(k%3)*1.65),z:-7.5+Math.floor(k/3)*1.25});tagPlotMeshes(p);plots2.push(p);}
+// Animals
+const ANIMAL={
+ chicken:{name:'Chicken',en:'Chicken',th:'ไก่',home:'coop',unlock:0,cost:120,feed:'wheat',prod:'egg',pth:'ไข่',time:10,emoji:'🐔',h:1.05,bs:.6},
+ cow:{name:'Cow',en:'Cow',th:'วัว',home:'barn',unlock:0,cost:400,feed:'corn',prod:'milk',pth:'นม',time:24,emoji:'🐄',h:1.75,bs:.85,big:1}};
+const animals=[];
+function makeChicken(){const g=new THREE.Group(),w=mat('#fffaf0'),o=mat('#ff9d1c');mesh(new THREE.SphereGeometry(1,8,6),w,g,0,.32,0).scale.set(.2,.19,.27);mesh(new THREE.SphereGeometry(1,8,6),w,g,0,.5,.2).scale.setScalar(.115);cone(g,0,.5,.32,.04,.1,o,4).rotation.x=Math.PI/2;box(g,0,.63,.2,.03,.07,.09,mat('#e83a3a'));mesh(new THREE.SphereGeometry(1,6,5),w,g,0,.42,-.25).scale.set(.07,.1,.1);box(g,-.07,.1,0,.025,.2,.025,o);box(g,.07,.1,0,.025,.2,.025,o);g.scale.setScalar(1.35);return g;}
+function makeCow(){const g=new THREE.Group(),w=mat('#f7f4ee'),k=mat('#2f3338');box(g,0,.78,0,.62,.55,1.15,w);box(g,.02,.8,-.15,.65,.3,.4,k);box(g,0,.98,.74,.4,.38,.4,w);box(g,0,.9,.97,.3,.2,.14,mat('#f2b6b0'));for(const s of [-1,1])box(g,s*.14,1.2,.72,.07,.13,.07,mat('#e8d9a8'));for(const [x,z] of [[-.2,.4],[.2,.4],[-.2,-.4],[.2,-.4]])box(g,x,.25,z,.14,.5,.14,k);box(g,0,.88,-.62,.06,.4,.06,k);return g;}
+function drawBubble(a,emoji){if(a.bk===emoji)return;a.bk=emoji;const x=a.bc.getContext('2d');x.clearRect(0,0,128,128);x.fillStyle='rgba(255,255,255,.95)';x.beginPath();x.arc(64,64,52,0,7);x.fill();x.strokeStyle='#f5c62c';x.lineWidth=7;x.stroke();x.font='60px sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(emoji,64,70);a.bt.needsUpdate=true;}
+function pickTarget(a){const h=ANIMAL[a.type].home,R=roamRect(h,a.pen),bd=bldRect(h,a.pen);let x,z,n=0;do{x=R[0]+Math.random()*(R[1]-R[0]);z=R[2]+Math.random()*(R[3]-R[2]);n++;}while(n<10&&Math.abs(x-bd.x)<bd.w+.4&&Math.abs(z-bd.z)<bd.d+.4);a.target=new THREE.Vector3(x,0,z);}
+function addAnimal(type,pi=0){const A=ANIMAL[type],idx=animals.length,g=MODEL[type]();g.userData.action='animal';g.userData.animalIndex=idx;const [x1,x2,z1,z2]=roamRect(A.home,pi);g.position.set(x1+Math.random()*(x2-x1),GROUND,z1+Math.random()*(z2-z1));scene.add(g);
+  const bc=document.createElement('canvas');bc.width=bc.height=128;const bt=new THREE.CanvasTexture(bc);bt.colorSpace=THREE.SRGBColorSpace;const bubble=new THREE.Sprite(new THREE.SpriteMaterial({map:bt,transparent:true,depthTest:false}));bubble.scale.set(A.bs,A.bs,1);bubble.renderOrder=5;bubble.userData.action='animal';bubble.userData.animalIndex=idx;scene.add(bubble);
+  const a={type,pen:pi,group:g,bubble,bc,bt,bk:null,state:'hungry',timer:0,wait:Math.random()*2,phase:Math.random()*6};pickTarget(a);animals.push(a);return a;}
+function speak(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-US';u.rate=.85;speechSynthesis.speak(u);}catch(e){}}
+function tapAnimal(a){const A=ANIMAL[a.type],p=a.group.position;speak(A.en);playSound(a.type==='cow'?'moo':'cluck');
+  if(a.state==='hungry'){if(silo[A.feed]>0){silo[A.feed]--;a.state='producing';a.timer=0;updateHUD();playSound('plant');floatText(`Feed 🍽️ -1 ${crops[A.feed].emoji}`,'#e67e22',p.x,GROUND+1.8,p.z);toast(`Fed! ${A.name} is full and making ${crops[A.prod].name}`);}else{playSound('error');toast(`${A.name} is hungry! You need ${crops[A.feed].name} ${crops[A.feed].emoji} in the Silo — grow and reap it in the Field`);}}
+  else if(a.state==='producing'){playSound('select');toast(`${A.name} is making ${crops[A.prod].name}... ${Math.max(1,Math.ceil(A.time*tmul(a.type)-a.timer))}s`);}
+  else{inventory[A.prod]++;a.state='hungry';updateHUD();playSound('harvest');floatText(`+1 ${crops[A.prod].emoji}`,'#21c875',p.x,GROUND+1.8,p.z);toast(`Collected! ${crops[A.prod].name} = ${A.pth}`);}}
+function buyBridge(){if(bridgeBuilt||houseLevel<BRIDGE_LEVEL||!spend(BRIDGE_COST,14,0))return;bridgeBuilt=true;bridge.visible=true;bridgeSign.visible=false;applyField();playSound('build');toast('Bridge built 🌉 Animal Island is open! Buy animals and plant wheat & corn.');updateHUD();flyTo(X0,1);wordCard('Bridge','สะพาน');}
+let camTw=null;function flyTo(tx,tz){const off=camera.position.clone().sub(controls.target),tT=new THREE.Vector3(tx,1.45,tz);camTw={t:0,fT:controls.target.clone(),tT,fP:camera.position.clone(),tP:tT.clone().add(off)};}
+$('camHome').addEventListener('click',()=>flyTo(0,2.1));$('camAnimal').addEventListener('click',()=>flyTo(X0,1));
+function updateIsland2Frame(dt,now){tickRush(dt);tickMisc(dt,now);saveClock+=dt;if(saveClock>6){saveClock=0;save();}
+  if(camTw){camTw.t=Math.min(1,camTw.t+dt/1.1);const k=camTw.t*camTw.t*(3-2*camTw.t);controls.target.lerpVectors(camTw.fT,camTw.tT,k);camera.position.lerpVectors(camTw.fP,camTw.tP,k);if(camTw.t>=1)camTw=null;}
+  const tx=controls.target.x,tz=controls.target.z;sun.target.position.set(tx,0,tz);sun.position.set(tx-7,18,tz+11);
+  for(const a of animals){const A=ANIMAL[a.type],g=a.group;
+    if(a.state==='producing'){a.timer+=dt*(buff2End>now?1.5:1)*(mode==='rush'?RUSH_SPEED:1)*(DEB[2].slow>now?.7:1)*(penaltyEnd>now?.6:1);if(a.timer>=A.time*tmul(a.type)){a.state='ready';playSound('ready');if(controls.target.x>20&&now-lastAnimalSnd>1.5){lastAnimalSnd=now;playSound(a.type==='cow'?'moo':'cluck');}floatText(`${crops[A.prod].emoji} Ready!`,'#20c978',g.position.x,GROUND+1.9,g.position.z);}}
+    if(a.wait>0){a.wait-=dt;if(!A.big)g.rotation.x=Math.max(0,Math.sin(now*9+a.phase))*.35;}else{g.rotation.x=0;const dx=a.target.x-g.position.x,dz=a.target.z-g.position.z,dist=Math.hypot(dx,dz);if(dist<.12){a.wait=1.5+Math.random()*3.5;pickTarget(a);}else{const sp=(A.big?.45:.8)*dt;g.position.x+=dx/dist*sp;g.position.z+=dz/dist*sp;const want=Math.atan2(dx,dz);let d=want-g.rotation.y;d=Math.atan2(Math.sin(d),Math.cos(d));g.rotation.y+=d*Math.min(1,dt*5);}}
+    g.position.y=GROUND+(a.wait>0?0:Math.abs(Math.sin(now*(A.big?4:9)+a.phase))*(A.big?.02:.05));
+    a.bubble.position.set(g.position.x,GROUND+A.h+Math.sin(now*3+a.phase)*.05,g.position.z);
+    drawBubble(a,a.state==='hungry'?crops[A.feed].emoji:a.state==='producing'?'⏳':crops[A.prod].emoji);}
+}
+
+// ===== v3: upgrades, scarecrow, save/leaderboard, quiz (Thai→English), Rush mode =====
+const UP={coop:1,barn:1,field:1},extra={coop:0,barn:0},UPC=[0,400,900,1800,3200],RUSH_SECS=960,RUSH_SPEED=1.5,POP_EVERY=120,BONUS=100,LS='mini_farm_island_v3';
+let buff2End=0,broken2End=0,mode='free',rush=null,started=false,saveClock=0,me='Player',store={profiles:{},rush:[]};
+const stats={sold:0,correct:0};
+const PER={chicken:8,cow:6},cap=t=>PER[t]*penN[ANIMAL[t].home],tmul=t=>1;
+function applyField(){plots2.forEach((p,i)=>{const on=bridgeBuilt&&i<fieldPlots;p.unlocked=on;p.group.visible=on;});}
+function applyUpgradeVisuals(){rebuildPens();}
+function buyUp(k){const l=UP[k];if(l>=5||!spend(UPC[l],wx(5),0))return;UP[k]++;applyUpgradeVisuals();applyField();updateHUD();playSound('build');toast(`${({coop:'Coop',barn:'Barn',field:'Field'})[k]} upgraded to level ${UP[k]}!`);save();}
+// Scarecrow quiz station
+const scare=new THREE.Group();scare.position.set(wx(-12.5),0,6);scene.add(scare);
+cylinder(scare,0,GROUND+1.05,0,.06,.07,2.1,mats.wood,6);box(scare,0,GROUND+1.55,0,1.5,.08,.08,mats.wood);box(scare,0,GROUND+1.15,0,.5,.7,.3,mat('#c9a050'));mesh(new THREE.SphereGeometry(.25,10,8),mat('#e8c98a'),scare,0,GROUND+1.85,0);cone(scare,0,GROUND+2.2,0,.34,.32,mat('#7a4b2a'),8);cylinder(scare,0,GROUND+2.04,0,.42,.42,.05,mat('#7a4b2a'),12);
+for(const s of [-1,1]){cone(scare,s*.8,GROUND+1.55,0,.07,.28,mat('#e6c35c'),5).rotation.z=s*Math.PI/2;}
+scare.traverse(o=>{o.userData.action='scarecrow';});makeLabel('Quiz ❓',wx(-12.5),GROUND+3,6,.8);
+// Quiz: show a Thai word, choose the English meaning. Each island has its own word pool.
+farmVocabulary.push(["Sow","หว่านเมล็ด","งานในฟาร์ม"],["Weed","ถอนวัชพืช","งานในฟาร์ม"],["Fertilize","ใส่ปุ๋ย","งานในฟาร์ม"],["Irrigate","ให้น้ำพืชผล","งานในฟาร์ม"],["Prune","ตัดแต่งกิ่ง","งานในฟาร์ม"],["Pick","เก็บผล","งานในฟาร์ม"],["Dig","ขุดดิน","งานในฟาร์ม"],["Ripen","สุก","พืชและการเติบโต"],
+ ["Feed the animals","ให้อาหารสัตว์","กิจกรรมสัตว์"],["Milk the cow","รีดนมวัว","กิจกรรมสัตว์"],["Collect eggs","เก็บไข่","กิจกรรมสัตว์"],["Graze","แทะเล็มหญ้า","กิจกรรมสัตว์"],["Herd","ต้อนสัตว์","กิจกรรมสัตว์"],["Brush","แปรงขนสัตว์","กิจกรรมสัตว์"],["Clean the pen","ทำความสะอาดคอก","กิจกรรมสัตว์"],["Shear","ตัดขนแกะ","กิจกรรมสัตว์"]);
+const P1=new Set(['ผักและผลไม้','พืชและการเติบโต','งานในฟาร์ม']),P2=new Set(['สัตว์ในฟาร์ม','ผลผลิตจากฟาร์ม','เครื่องมือ','พื้นฐานฟาร์ม','กิจกรรมสัตว์']);
+$('sellBtn').addEventListener('click',()=>{let total=0,earned=0;for(const k in inventory){total+=inventory[k];earned+=inventory[k]*crops[k].sell;inventory[k]=0;}if(!total)return;{const t=performance.now()/1000;let mu=1;if(mode==='rush'&&penaltyEnd>t)mu*=.85;if(DEB.sell>t)mu*=.85;earned=Math.round(earned*mu);}money+=earned;stats.sold+=earned;updateHUD();playSound('coin',total);floatText(`+${earned} 🪙`,'#19b96c',-2,GROUND+2.1,1);toast(`Sold ${total} items for ${earned} coins!`);save();});
+// Animal-island menu: bridge, seeds, animals, upgrades
+// Save / load
+function snap(){const plants=[];for(const p of plots)if(p.unlocked)for(const s of p.slots)if(s.plant)plants.push({p:p.index,s:s.slotIndex,c:s.crop,g:s.growth,r:s.ripe});return{money,houseLevel,unlockedPlots,bridge:bridgeBuilt,UP:{...UP},extra:{...extra},silo:{...silo},siloLv,penN:{...penN},fieldPlots,inv:{...inventory},stats:{...stats},plants,animals:animals.map(a=>({t:a.type,st:a.state,tm:a.timer,pi:a.pen})),ts:Date.now()};}
+function persist(){try{localStorage.setItem(LS,JSON.stringify(store));}catch(e){}}
+function save(){if(!started||mode!=='free')return;store.profiles[me]=snap();persist();}
+function restore(s){resetWorld();money=s.money;houseLevel=s.houseLevel;createHouse(houseLevel);unlockedPlots=s.unlockedPlots;plots.forEach((p,i)=>{if(i<46){p.unlocked=i<unlockedPlots;p.group.visible=p.unlocked;}});Object.assign(UP,s.UP);Object.assign(extra,s.extra||{});penN.coop=Math.min(3,Math.max(1,(s.penN&&s.penN.coop)||1));penN.barn=Math.min(3,Math.max(1,(s.penN&&s.penN.barn)||1));fieldPlots=Math.min(18,Math.max(4,s.fieldPlots||3+((s.UP&&s.UP.field)||1)));Object.assign(inventory,s.inv);Object.assign(stats,s.stats);siloLv=s.siloLv||1;Object.assign(silo,s.silo||{});for(const k of ['wheat','corn']){silo[k]=Math.min(siloCap(),(silo[k]||0)+(inventory[k]||0));inventory[k]=0;}
+  if(s.bridge){bridgeBuilt=true;bridge.visible=true;bridgeSign.visible=false;}applyField();applyUpgradeVisuals();
+  for(const q of s.plants||[]){const pl=plots[q.p],sl=pl&&pl.slots[q.s];if(!sl||!pl.unlocked)continue;sl.crop=q.c;sl.growth=q.g;sl.ripe=q.r;sl.plantAge=1;sl.matureAge=q.r?1:0;sl.plant=createCropModel(q.c,pl,q.s);scene.add(sl.plant);sl.plant.scale.setScalar(.6);sl.sprite.visible=!q.r;drawProgress(sl);}
+  const cnt={chicken:0,cow:0};for(const q of s.animals||[]){const A=ANIMAL[q.t];if(!A)continue;const pi=Math.min(2,q.pi!=null?q.pi:Math.floor(cnt[q.t]/PER[q.t]));cnt[q.t]++;if(penN[A.home]<=pi){penN[A.home]=pi+1;rebuildPens();}const a=addAnimal(q.t,pi);a.state=q.st;a.timer=q.tm;}updateHUD();}
+function resetWorld(){for(const p of plots)for(const sl of p.slots)if(sl.plant)resetCropSlot(sl);plots.forEach((p,i)=>{p.unlocked=i<6;p.group.visible=i<6;});unlockedPlots=6;houseLevel=1;createHouse(1);money=100;for(const k in inventory)inventory[k]=0;stats.sold=0;stats.correct=0;UP.coop=UP.barn=UP.field=1;extra.coop=extra.barn=0;penN.coop=penN.barn=1;fieldPlots=4;siloLv=1;silo.wheat=silo.corn=0;debt=0;loanTaken=false;penaltyEnd=0;for(const i of [1,2])DEB[i].slow=DEB[i].cost=0;DEB.sell=0;bridgeBuilt=false;bridge.visible=false;bridgeSign.visible=true;for(const a of animals){scene.remove(a.group);scene.remove(a.bubble);}animals.length=0;applyUpgradeVisuals();selectedCrop='tomato';buffEnd=brokenEnd=buff2End=broken2End=0;updateHUD();}
+// Rush mode: you + 3 rivals, 16 minutes, pop-up word every 2 minutes
+const fmt=t=>{t=Math.max(0,Math.ceil(t));return`${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`;};
+function rows(){return[{n:me,you:1,def:rush.over&&debt>0,sold:stats.sold,correct:stats.correct},...rush.bots].map(r=>({...r,score:Math.round(r.sold)+r.correct*BONUS})).sort((a,b)=>(a.def?1:0)-(b.def?1:0)||b.score-a.score);}
+function renderBoard(){renderLoan();netSend();$('boardRows').innerHTML=rows().map((r,i)=>`<tr${r.you?' class="me"':''}><td>${i+1}. ${r.n}</td><td>${Math.round(r.sold).toLocaleString()}</td><td>${r.correct}</td><td><b>${r.score.toLocaleString()}</b></td></tr>`).join('');}
+function tickRush(dt){if(mode!=='rush'||!rush||rush.over||$('menu').classList.contains('open'))return;rush.t+=dt;for(const b of rush.bots)b.sold+=b.r*dt*(.6+Math.random()*.8)*(1+rush.t/480);
+  if(rush.pop<7&&rush.t>=(rush.pop+1)*POP_EVERY){rush.pop++;for(const b of rush.bots)if(Math.random()<b.p)b.correct++;openQuiz(Math.random()<.5?1:2,true);}
+  if(debt>0){const m=Math.floor(rush.t/240);if(m>rush.lastRem&&rush.t<RUSH_SECS-60){rush.lastRem=m;showAlert(`🏦 Loan reminder: you owe ${debt.toLocaleString()} coins. Repay before the match ends or you lose!`,8000);}if(rush.t>=RUSH_SECS-60&&!rush.warned){rush.warned=1;showAlert('⏰ 1 minute left! Repay your loan now or you lose immediately!',10000);}}rush.clock=(rush.clock||0)+dt;if(rush.clock>.5){rush.clock=0;renderBoard();}$('rushTime').textContent=fmt(RUSH_SECS-rush.t);if(rush.t>=RUSH_SECS)endRush();}
+function endRush(){rush.over=true;const r=rows(),place=r.findIndex(x=>x.you)+1,y=r[place-1];store.rush.push({n:me,sold:y.sold,correct:y.correct,score:y.score,place,ts:Date.now()});store.hist=store.hist||[];store.hist.unshift({ts:Date.now(),diff:onlineOthers?'online':diff,place,sold:Math.round(y.sold),correct:y.correct,score:y.score,def:!!y.def});store.hist=store.hist.slice(0,30);store.rush=store.rush.sort((a,b)=>b.score-a.score).slice(0,20);persist();$('board').style.display='none';mode='ended';$('modalWrap').classList.remove('open');showMenu('results',r);playSound(place===1&&!y.def?'win':'lose');closeNet();}
+function begin(m){mode=m;started=true;$('menu').classList.remove('open');$('board').style.display=m==='rush'?'block':'none';if(m==='rush'){rush={t:0,pop:0,lastRem:0,warned:0,over:false,bots:(onlineOthers?onlineOthers.map(n=>[n,0,0]):BOTS[diff]).map(([n,r,p])=>({n,r,p,sold:0,correct:0}))};renderBoard();toast('Rush started — 16:00 on the clock!');}else rush=null;updateHUD();}
+const tbl=(h,rs)=>`<table class="lb"><thead><tr>${h.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>${rs.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')||`<tr><td colspan="${h.length}">No records yet</td></tr>`}</tbody></table>`;
+function showMenu(view='home',res){const m=$('menuBody'),rd=()=>(($('nameIn')?.value||me).trim()||'Player').slice(0,12);$('menu').classList.add('open');
+  if(view==='home'){m.innerHTML=`<h2>🌿 Mini Farm Island</h2><label class="nm">Player name <input id="nameIn" maxlength="12" value="${me}"></label><div class="modes"><div class="mode"><h3>🌱 Free Farm</h3><ul><li>Pick a seed, plant, wait, harvest, then <b>sell</b> your produce.</li><li>Click the <b>Robot</b> (Farm Island) or the <b>Scarecrow</b> (Animal Island): translate the Thai word into English for a 10s growth buff.</li><li>Reach house level ${BRIDGE_LEVEL}, build the bridge, then raise chickens and cows and grow wheat & corn.</li><li>Reap wheat and corn with the sickle 🌾 into the Silo, then feed your animals. Expand your field, buy more pens and upgrade the silo. Progress saves automatically.</li></ul><button class="mbtn" id="mCont">▶ Continue</button><button class="mbtn alt" id="mNew">New game</button></div><div class="mode"><h3>🏆 Rush · 4 players</h3><ul><li>You vs 3 bot rivals for <b>16 minutes</b>. Pick Easy, Normal or Hard.</li><li>Score = coins from sales + ${BONUS} per correct answer.</li><li>A pop-up word appears every <b>2 minutes</b>. Robot and Scarecrow quizzes count too.</li><li>Crops and animals work 1.5× faster in Rush. A wrong pop-up answer slows growth 40% and cuts sales 15% for 1:45.</li><li>Take a loan in the first 4 minutes — repay it before the end or you lose immediately!</li><li>Highest score at 16:00 wins and enters the leaderboard.</li></ul><div class="diffRow"><button class="dbtn" data-d="easy">Easy</button><button class="dbtn" data-d="normal">Normal</button><button class="dbtn" data-d="hard">Hard</button></div><button class="mbtn" id="mRush">Start Rush vs bots</button><button class="mbtn alt" id="mOnline">🌐 Online Rush (rooms)</button></div></div><button class="mbtn alt" id="mBoard">📊 My scores & history</button>`;
+    const c=$('mCont'),ni=$('nameIn');c.disabled=!store.profiles[me];ni.oninput=()=>{c.disabled=!store.profiles[rd()];};
+    c.onclick=()=>{me=rd();useBook();if(store.profiles[me]){restore(store.profiles[me]);begin('free');}};$('mNew').onclick=()=>{me=rd();useBook();resetWorld();begin('free');save();};$('mRush').onclick=()=>{me=rd();useBook();resetWorld();begin('rush');};$('mBoard').onclick=()=>showMenu('board');const dbs=document.querySelectorAll('.dbtn'),pd=()=>dbs.forEach(x=>x.classList.toggle('on',x.dataset.d===diff));dbs.forEach(b=>b.onclick=()=>{diff=b.dataset.d;pd();});pd();const mo=$('mOnline');if(mo)mo.onclick=()=>{me=rd();useBook();showOnline();};}
+  else if(view==='book'){const arr=Object.entries(wb).map(([w,d])=>({w,...d})).sort((x,y)=>(y.star-x.star)||(y.miss-x.miss)||(y.ok-x.ok)),total=new Set(farmVocabulary.map(w=>w[0])).size;m.innerHTML=`<h2>📖 Word Book</h2><p class="nm">Words learned: <b>${arr.filter(d=>d.ok>0).length}</b> / ${total} · ⭐ = missed twice. The Robot and Scarecrow ask these again until you get 3 right in a row.</p>${tbl(['','English','Thai','✔','✖'],arr.slice(0,80).map(d=>[d.star?'⭐':'',d.w,d.th,d.ok,d.miss]))}<button class="mbtn" id="mBack">${started?'Back to game':'Back'}</button>`;$('mBack').onclick=()=>started?$('menu').classList.remove('open'):showMenu('home');}
+  else if(view==='board'){const ps=Object.entries(store.profiles).map(([n,p])=>[n,(p.stats?.sold||0),(p.stats?.correct||0),`Lv.${p.houseLevel}`,Object.values((store.books||{})[n]||{}).filter(d=>d.ok>0).length]).sort((a,b)=>b[1]-a[1]);m.innerHTML=`<h2>📊 My scores & history</h2><h3>Free Farm — players on this device</h3>${tbl(['Player','Sales (coins)','Correct answers','House','Words learned'],ps.map(r=>[r[0],r[1].toLocaleString(),r[2],r[3],r[4]]))}<h3>Rush — best scores</h3>${tbl(['Player','Sales','Correct','Score','Place'],store.rush.map(r=>[r.n,Math.round(r.sold).toLocaleString(),r.correct,`<b>${r.score.toLocaleString()}</b>`,`#${r.place}`]))}<h3>Recent Rush games</h3>${tbl(['When','Level','Place','Sales','Correct'],(store.hist||[]).map(h=>[new Date(h.ts).toLocaleDateString(),h.diff,h.def?'💥 lost (loan)':'#'+h.place,h.sold.toLocaleString(),h.correct]))}<button class="mbtn" id="mBack">Back</button>`;$('mBack').onclick=()=>showMenu('home');}
+  else{m.innerHTML=`<h2>🏁 Rush finished!</h2><p class="nm">${res.find(x=>x.you).def?'💥 Unpaid loan — you lose immediately!':res.findIndex(x=>x.you)===0?'🥇 You won!':`You placed #${res.findIndex(x=>x.you)+1}`}</p>${tbl(['Player','Sales','Correct','Score'],res.map((r,i)=>[`${i+1}. ${r.n}${r.you?' (you)':''}`,Math.round(r.sold).toLocaleString(),r.correct,`<b>${r.score.toLocaleString()}</b>`]))}<button class="mbtn" id="mBack">Back to menu</button>`;$('mBack').onclick=()=>showMenu('home');}}
+$('menuBtn').addEventListener('click',()=>{if(mode==='rush'){toast('Menu is locked during Rush');return;}save();showMenu('home');});
+addEventListener('pagehide',save);$('bookBtn').addEventListener('click',()=>{if(mode==='rush'){toast('Word Book is locked during Rush');return;}showMenu('book');});
+try{const d=JSON.parse(localStorage.getItem(LS));if(d)store=d;const last=Object.entries(store.profiles).sort((a,b)=>b[1].ts-a[1].ts)[0];if(last)me=last[0];}catch(e){}
+applyUpgradeVisuals();applyField();showMenu('home');
+
+// ===== v4: Word Book, 3 quiz types, more animals, pen slots =====
+const SENT=Object.fromEntries(`Egg|The hen lays an ___.
+Hen|A mother chicken is called a ___.
+Cow|A ___ gives us milk.
+Milk|We drink ___ from cows.
+Sheep|A ___ gives us wool.
+Wool|A warm sweater is made from ___.
+Pig|A ___ likes to roll in the mud.
+Duck|A ___ swims in the pond and says quack.
+Rooster|The ___ crows in the morning.
+Chick|A baby chicken is called a ___.
+Calf|A baby cow is called a ___.
+Lamb|A baby sheep is called a ___.
+Piglet|A baby pig is called a ___.
+Honey|Bees make sweet ___.
+Bee|A ___ makes honey.
+Barn|The cow sleeps in the ___.
+Coop|Chickens sleep in a ___.
+Fence|A ___ keeps the animals inside the farm.
+Hay|Cows eat dry ___ in winter.
+Bucket|We carry milk in a ___.
+Feed|We ___ the animals every morning.
+Rabbit|A ___ has long ears and loves carrots.
+Pond|Ducks swim in the ___.
+Gate|Close the ___ so the sheep cannot run away.
+Bridge|We cross the river on a ___.
+Seed|Plant a ___ in the soil.
+Water|Plants need sunlight and ___ to grow.
+Harvest|We ___ the crops when they are ripe.
+Sow|Farmers ___ seeds in spring.
+Weed|A ___ is a plant you do not want in your garden.
+Root|The ___ of a plant drinks water from the soil.
+Leaf|A green ___ makes food from sunlight.
+Flower|A bee visits each ___ for nectar.
+Fruit|An apple is a sweet ___.
+Vegetable|A carrot is a ___.
+Tomato|Ketchup is made from a red ___.
+Corn|Popcorn is made from ___.
+Wheat|Bread is made from ___.
+Rice|People in Thailand eat ___ every day.
+Pumpkin|We carve a ___ at Halloween.
+Banana|A monkey loves to eat a yellow ___.
+Potato|French fries are made from a ___.
+Ripe|A ___ mango is sweet and soft.
+Prune|We ___ a tree to cut its extra branches.
+Soil|Plants grow in ___.
+Shovel|We dig a hole with a ___.
+Watering can|Use a ___ to water the flowers.
+Rake|Use a ___ to collect fallen leaves.
+Sprinkler|A ___ sprays water over the lawn.
+Fertilizer|___ helps plants grow strong.
+Sunlight|Plants need ___ and water.
+Pick|We ___ apples from the tree.`.split('\n').map(l=>l.split('|')));
+let wb={},wcT=null;
+function useBook(){store.books=store.books||{};wb=store.books[me]=store.books[me]||{};}
+function noteWord(w,ok){const d=wb[w[0]]=wb[w[0]]||{th:w[1],ok:0,miss:0,streak:0,star:false};if(ok){d.ok++;d.streak++;if(d.star&&d.streak>=3)d.star=false;}else{d.miss++;d.streak=0;if(d.miss>=2)d.star=true;}persist();}
+const shuf=a=>[...a].sort(()=>Math.random()-.5);
+function wordCard(en,th,sub='New word!'){qDeadline=0;$('qTimer').style.display='none';speak(en);$('modalTitle').textContent='✨ '+sub;$('modalSub').textContent='';$('questionText').style.fontSize='';$('questionText').textContent=en;$('answerButtons').innerHTML=`<div class="answer correct" style="grid-column:1/3;cursor:default">${th}</div>`;$('quizFeedback').textContent='';$('modalWrap').classList.add('open');clearTimeout(wcT);wcT=setTimeout(()=>$('modalWrap').classList.remove('open'),2800);}
+let cq=null,cqDone=false,cqIsland=1,cqPopup=false;
+function openQuiz(isl=1,popup=false){const now=performance.now()/1000;clearTimeout(wcT);
+  if(!popup){const br=isl===2?broken2End:brokenEnd,bf=isl===2?buff2End:buffEnd;if(br>now){playSound('error');toast('Still repairing — wait a moment!');return;}if(bf>now){toast('Buff is still active 🌊');playSound('select');return;}}
+  ensureAudio();const pl=popup?farmVocabulary:farmVocabulary.filter(w=>(isl===2?P2:P1).has(w[2])),r=Math.random();let mk=r<.4?'th2en':r<.7?'en2th':'fill';
+  let base=mk==='fill'?pl.filter(w=>SENT[w[0]]):pl;if(!base.length){base=pl;mk='th2en';}
+  const stars=base.filter(w=>wb[w[0]]&&wb[w[0]].star),src=stars.length&&Math.random()<.45?stars:base,it=src[Math.floor(Math.random()*src.length)];let q,ans,opts,sub;
+  if(mk==='th2en'){q=it[1];ans=it[0];opts=farmVocabulary.filter(w=>w[1]!==it[1]&&w[0]!==it[0]).map(w=>w[0]);sub='What is this in English?';}
+  else if(mk==='en2th'){q=it[0];ans=it[1];opts=farmVocabulary.filter(w=>w[0]!==it[0]&&w[1]!==it[1]).map(w=>w[1]);sub='What is this in Thai?';}
+  else{q=SENT[it[0]];ans=it[0];opts=pl.filter(w=>w[0]!==it[0]&&w[1]!==it[1]&&w[2]===it[2]).map(w=>w[0]);if(opts.length<3)opts=pl.filter(w=>w[0]!==it[0]&&w[1]!==it[1]).map(w=>w[0]);sub=`Fill in the blank · hint: ${it[1]}`;}
+  if(wb[it[0]]&&wb[it[0]].star)sub+=' · ⭐ review word';sub+=popup?` · +${BONUS} pts`:' · correct = 10s buff';
+  cq={w:it,ans};cqDone=false;cqIsland=isl;cqPopup=popup;$('questionText').style.fontSize=mk==='fill'?'19px':'';$('questionText').textContent=q;
+  $('modalTitle').textContent=popup?'⏰ Pop quiz!':isl===2?'🧑‍🌾 Scarecrow Quiz':'🤖 Watering Robot';$('modalSub').textContent=sub;$('quizFeedback').textContent='';
+  const h=$('answerButtons');h.innerHTML='';for(const o of shuf([ans,...shuf([...new Set(opts)]).slice(0,3)])){const b=document.createElement('button');b.className='answer';b.textContent=o;b.addEventListener('click',()=>answerQuiz(o,b));h.appendChild(b);}qDeadline=popup?0:performance.now()/1000+8;$('qTimer').style.display=popup?'none':'block';$('qBar').style.width='100%';$('qNum').textContent=8;$('modalWrap').classList.add('open');}
+function answerQuiz(a,btn){if(cqDone)return;cqDone=true;qDeadline=0;[...$('answerButtons').children].forEach(b=>{b.disabled=true;if(b.textContent===cq.ans)b.classList.add('correct');});const ok=a===cq.ans,now=performance.now()/1000,fb=$('quizFeedback'),pair=`${cq.w[0]} = ${cq.w[1]}`;noteWord(cq.w,ok);
+  if(ok){stats.correct++;playSound('correct');fb.style.color='#12a960';fb.textContent=(cqPopup?`Correct! +${BONUS} bonus points`:'Great! Crops grow 1.5× faster for 10s 💦')+` · ${pair}`;
+    if(!cqPopup){if(cqIsland===2){buff2End=now+10;floatText('Correct! Buff on','#19bd6e',wx(-12.5),GROUND+3,6);}else{buffEnd=now+10;robotHappyEnd=buffEnd;robotRoot.userData.mood='happy';updateRobotSign('Watering 💦','buff');floatText('Correct! Buff on','#19bd6e',-4.45,GROUND+3.35,.58);}}}
+  else{btn&&btn.classList.add('wrong');playSound('error');if(cqPopup&&mode==='rush')penalize(now);fb.style.color='#e64c40';fb.textContent=(a===null?'⏱ Time is up! ':'Oops! ')+pair+(cqPopup?'':' · repairs take 10s 😵');
+    if(!cqPopup){debuff(cqIsland,now);if(cqIsland===2)broken2End=now+10;else{brokenEnd=now+10;robotRoot.userData.mood='broken';updateRobotSign('Broken! 10s','broken');spawnSparks(new THREE.Vector3(-4.45,GROUND+1.4,.58),25);}}}
+  speak(cq.w[0]);updateHUD();save();setTimeout(()=>$('modalWrap').classList.remove('open'),cqPopup?2400:2000);}
+// New animal models
+function makeDuck(){const g=new THREE.Group(),w=mat('#f3d95a'),o=mat('#ff9d1c');mesh(new THREE.SphereGeometry(1,8,6),w,g,0,.3,0).scale.set(.2,.17,.28);mesh(new THREE.SphereGeometry(1,8,6),mat('#2f8f5a'),g,0,.5,.18).scale.setScalar(.11);box(g,0,.47,.33,.1,.03,.12,o);mesh(new THREE.SphereGeometry(1,6,5),w,g,0,.38,-.27).scale.set(.06,.08,.1);box(g,-.07,.08,0,.025,.16,.025,o);box(g,.07,.08,0,.025,.16,.025,o);g.scale.setScalar(1.35);return g;}
+function makeSheep(){const g=new THREE.Group(),w=mat('#f4f1ea'),k=mat('#3a3a40');for(const [x,y,z,s] of [[0,.8,0,.46],[.2,.82,-.28,.34],[-.2,.82,.28,.34],[.18,.78,.3,.3],[-.2,.78,-.3,.3]])mesh(new THREE.IcosahedronGeometry(s,1),w,g,x,y,z);box(g,0,.88,.66,.3,.32,.32,k);for(const [x,z] of [[-.2,.3],[.2,.3],[-.2,-.3],[.2,-.3]])box(g,x,.25,z,.1,.5,.1,k);return g;}
+function makePig(){const g=new THREE.Group(),p=mat('#f4a6b8'),d=mat('#d97f94');box(g,0,.6,0,.62,.52,1.0,p);box(g,0,.68,.66,.42,.4,.38,p);cylinder(g,0,.62,.88,.12,.12,.12,d,8).rotation.x=Math.PI/2;for(const s of [-1,1])box(g,s*.14,.92,.6,.1,.1,.06,d);for(const [x,z] of [[-.2,.32],[.2,.32],[-.2,-.32],[.2,-.32]])box(g,x,.18,z,.14,.36,.14,d);return g;}
+const MODEL={chicken:makeChicken,duck:makeDuck,cow:makeCow,sheep:makeSheep,pig:makePig};
+// Animal-island menu: bridge, seeds, animals (unlock by house level), pen slots, upgrades
+function buySlot(h){const n=extra[h],c=120+80*n;if(n>=6||!spend(c,wx(5),h==='coop'?6:-6))return;extra[h]++;updateHUD();playSound('build');toast(`New ${h} slot! Room for ${2+extra[h]} animals`);save();}
+function buyAnimal(type){const A=ANIMAL[type];if(houseLevel<A.unlock){toast(`${A.name} unlocks at house level ${A.unlock}`);return;}if(animals.filter(a=>ANIMAL[a.type].home===A.home).length>=cap(type)){playSound('error');toast('All pens are full — buy another pen first');return;}if(!spend(A.cost,wx(5),0))return;addAnimal(type,Math.floor(animals.filter(a=>a.type===type).length/PER[type]));playSound('build');updateHUD();wordCard(A.en,`${A.th} · ${crops[A.prod].name} = ${A.pth}`,'New animal!');save();}
+
+// ===== v6: silo + sickle, bigger pens, quiz timer & debuffs, Rush penalty & loans =====
+const silo={wheat:0,corn:0},SILO_C=[0,300,600,1000,1600],siloPos=new THREE.Vector3(wx(-10.8),0,-5),DEB={1:{slow:0,cost:0},2:{slow:0,cost:0},sell:0},LOAN_AMT=1500,LOAN_REPAY=1800,LOAN_WINDOW=240;
+let siloLv=1,siloPulse=0,debt=0,loanTaken=false,penaltyEnd=0,qDeadline=0,lastStatus='',miscClock=0,alertT=null;
+const siloCap=()=>siloLv*10;
+const siloG=new THREE.Group();siloG.position.copy(siloPos);scene.add(siloG);
+box(siloG,0,GROUND+.85,0,2.0,1.7,1.8,mat('#c9372c'));const sRoof=cone(siloG,0,GROUND+2.15,0,1.75,1.0,mat('#7b2a22'),4);sRoof.rotation.y=Math.PI/4;sRoof.scale.z=.9;
+box(siloG,0,GROUND+.6,.91,.7,1.2,.06,mat('#f4f0df'));box(siloG,.68,GROUND+1.2,.91,.35,.35,.06,mat('#ffe9a8'));box(siloG,0,GROUND+1.72,.91,2.05,.08,.06,mat('#f4f0df'));
+box(siloG,-.78,GROUND+.7,.93,.2,1.1,.05,mat('#5a2a24'));const gauge=box(siloG,-.78,GROUND+.2,.96,.14,1,.05,mat('#ffd23f'));
+makeLabel('🏠 Silo',siloPos.x,GROUND+3.5,siloPos.z,.8);
+const grains=[],gGeo=new THREE.SphereGeometry(.07,6,5),gMat=new THREE.MeshStandardMaterial({color:'#ffd23f',emissive:'#7a5a00',roughness:.5});
+function addGrain(from,vel,dur,to){const m=new THREE.Mesh(gGeo,gMat);m.position.copy(from);scene.add(m);grains.push({m,v:vel,t:0,dur,to,from:from.clone()});}
+function spawnGrains(x,z){const top=new THREE.Vector3(siloPos.x,GROUND+1.6,siloPos.z+.9);for(let i=0;i<6;i++)addGrain(new THREE.Vector3(x+(Math.random()-.5)*.4,GROUND+.8,z+(Math.random()-.5)*.4),null,.7+Math.random()*.3,top);}
+function burstSilo(){for(let i=0;i<30;i++)addGrain(new THREE.Vector3(siloPos.x,GROUND+2.3,siloPos.z),new THREE.Vector3((Math.random()-.5)*4.5,2.5+Math.random()*3.5,(Math.random()-.5)*4.5),1.3,null);}
+function updateGrains(dt){for(let i=grains.length-1;i>=0;i--){const g=grains[i];g.t+=dt;if(g.to){const k=Math.min(1,g.t/g.dur);g.m.position.lerpVectors(g.from,g.to,k);g.m.position.y+=Math.sin(k*Math.PI)*1.6;}else{g.v.y-=9*dt;g.m.position.addScaledVector(g.v,dt);if(g.m.position.y<GROUND+.05){g.m.position.y=GROUND+.05;g.v.set(0,0,0);}}if(g.t>=g.dur+(g.to?0:.8)){scene.remove(g.m);grains.splice(i,1);}}}
+function toSilo(k,x,z){const full=silo[k]>=siloCap();siloPulse=.45;if(full){burstSilo();playSound('error');floatText('Silo full! Grain lost','#e6a100',siloPos.x,GROUND+3,siloPos.z);toast('Silo is full — upgrade it to store more!');}else{silo[k]++;spawnGrains(x,z);playSound('grain');floatText(`+1 ${crops[k].name} → Silo`,'#21c875',x,GROUND+1.5,z);if(silo[k]>=siloCap()){burstSilo();toast(`${crops[k].name} storage is full!`);}}updateHUD();}
+function reap(){if(!bridgeBuilt)return;let n=0;playSound('whoosh');for(const p of plots2)if(p.unlocked)for(const s of p.slots)if(s.plant&&s.ripe){harvestSlot(s);n++;}const e=$('slash');e.classList.remove('go');void e.offsetWidth;e.classList.add('go');if(!n){playSound('select');toast('Nothing to reap yet — wheat and corn are still growing');}}
+function buySiloUp(){if(siloLv>=5||!spend(SILO_C[siloLv],siloPos.x,siloPos.z))return;siloLv++;updateHUD();playSound('build');toast(`Silo upgraded! Stores ${siloCap()} of each grain`);save();}
+function updateSiloUI(){const el=$('silo');el.classList.toggle('show',bridgeBuilt&&started);if(!bridgeBuilt)return;$('siloLv').textContent=`Lv.${siloLv}`;$('siloW').textContent=silo.wheat;$('siloC').textContent=silo.corn;for(const e of el.querySelectorAll('.sc'))e.textContent=siloCap();let n=0;for(const p of plots2)if(p.unlocked)for(const s of p.slots)if(s.plant&&s.ripe)n++;$('ripeN').textContent=n;$('sickleBtn').classList.toggle('dim',!n);$('siloUp').disabled=siloLv>=5||money<SILO_C[siloLv];$('siloUp').textContent=siloLv>=5?'MAX':`⬆ ${SILO_C[siloLv]}`;const f=(silo.wheat+silo.corn)/(2*siloCap());gauge.scale.y=Math.max(.001,f);gauge.position.y=GROUND+.2+f/2;}
+$('sickleBtn').addEventListener('click',reap);$('siloUp').addEventListener('click',buySiloUp);
+// Pens grow with upgrades
+// Quiz timer (8s), debuffs, Rush penalty, alerts
+const qt=document.createElement('div');qt.id='qTimer';qt.innerHTML='<div id="qBar"></div><span id="qNum">8</span>';$('answerButtons').before(qt);
+function showAlert(m,ms=6000){const a=$('alertBar');a.textContent=m;a.style.display='block';clearTimeout(alertT);alertT=setTimeout(()=>{a.style.display='none';},ms);}
+function penalize(now){penaltyEnd=now+105;showAlert('⚠️ Wrong answer! Growth and production −40%, sales −15% for 1:45',7000);}
+function debuff(isl,now){DEB[isl].slow=now+10;DEB[isl].cost=now+8;DEB.sell=now+10;toast('Wrong! Crops grow 30% slower for 10s, seeds cost +12% for 8s, sales −15% for 10s');}
+function tickQuizTimer(){if(!qDeadline)return;if(!$('modalWrap').classList.contains('open')||cqDone){qDeadline=0;return;}const left=qDeadline-performance.now()/1000;const sec=Math.max(0,Math.ceil(left));$('qNum').textContent=sec;if(sec<=3&&sec>0&&sec!==lastTick){lastTick=sec;playSound('tick');}if(sec>3)lastTick=-1;$('qBar').style.width=Math.max(0,left/8*100)+'%';if(left<=0){qDeadline=0;answerQuiz(null,null);}}
+function tickStatus(now){const a=[];if(penaltyEnd>now)a.push(`⚠️ Penalty: growth −40%, sales −15% · ${fmt(penaltyEnd-now)}`);for(const i of [1,2])if(DEB[i].slow>now)a.push(`🐌 ${i===1?'Farm':'Animal'} crops −30% · ${Math.ceil(DEB[i].slow-now)}s`);for(const i of [1,2])if(DEB[i].cost>now)a.push(`💸 ${i===1?'Farm':'Animal'} seeds +12% · ${Math.ceil(DEB[i].cost-now)}s`);if(DEB.sell>now)a.push(`💰 Sales −15% · ${Math.ceil(DEB.sell-now)}s`);const h=a.map(t=>`<span>${t}</span>`).join('');if(h!==lastStatus){lastStatus=h;$('status').innerHTML=h;}}
+function tickMisc(dt,now){tickFx(dt,now);siloPulse=Math.max(0,siloPulse-dt);const b=1+.06*(siloLv-1),p=siloPulse;siloG.scale.set(b*(1-.06*p),b*(1+.18*p),b*(1-.06*p));updateGrains(dt);tickQuizTimer();tickStatus(now);miscClock+=dt;if(miscClock>.4){miscClock=0;updateSiloUI();}}
+// Loans (Rush only)
+function renderLoan(){if(!rush)return;const b=$('loanBtn'),t=$('loanTxt');if(debt>0){t.textContent=`Debt: ${debt.toLocaleString()} 🪙`;b.textContent='Repay';b.disabled=money<debt;}else if(!loanTaken&&rush.t<LOAN_WINDOW){t.textContent='🏦 Loan (first 4 min)';b.textContent=`Borrow ${LOAN_AMT.toLocaleString()} → repay ${LOAN_REPAY.toLocaleString()}`;b.disabled=false;}else{t.textContent=loanTaken?'🏦 Loan repaid ✅':'🏦 Loans closed';b.style.display='none';return;}b.style.display='';}
+$('loanBtn').addEventListener('click',()=>{if(!rush||rush.over)return;if(debt>0){if(money<debt){toast('Not enough coins to repay');return;}money-=debt;debt=0;toast('Loan repaid ✅');playSound('spend');}else if(!loanTaken&&rush.t<LOAN_WINDOW){money+=LOAN_AMT;debt=LOAN_REPAY;loanTaken=true;toast(`Borrowed ${LOAN_AMT} coins — repay ${LOAN_REPAY} before time runs out!`);playSound('harvest');}updateHUD();renderLoan();});
+// Animal-island menu: bridge, seeds, animals, pen / field / silo upgrades
+const PENC={coop:[300,600],barn:[500,1000]};
+const roamRect=(h,i)=>{const [x1,x2,z1,z2]=SLOT[h][i];return[wx(x1+.7),wx(x2-.7),z1+.7,z2-.7];};
+function bldRect(h,i){const [x1,x2,z1,z2]=SLOT[h][i];return h==='barn'?{x:wx(x1+2.2),z:z1+1.1,w:1.4,d:1.1}:{x:wx(x1+2.2),z:z2-1.0,w:1.0,d:.8};}
+function rebuildPens(){for(const h of ['coop','barn']){const g=penG[h];while(g.children.length)g.remove(g.children[0]);const src=h==='coop'?coop:barn;for(let i=0;i<penN[h];i++){const [x1,x2,z1,z2]=SLOT[h][i];fenceRect(g,wx(x1),z1,wx(x2),z2);const r=bldRect(h,i),b=i===0?src:(penB[h][i]=penB[h][i]||src.clone());b.scale.setScalar(.8);b.position.set(r.x,0,r.z);if(b.parent!==scene)scene.add(b);b.visible=true;}for(let i=penN[h];i<3;i++)if(penB[h][i])penB[h][i].visible=false;}const bb=bldRect('barn',0),cc=bldRect('coop',0);lblBarn.position.set(bb.x,GROUND+3.1,bb.z);lblCoop.position.set(cc.x,GROUND+2.4,cc.z);}
+function buyField(){if(fieldPlots>=18||!spend(150,wx(-6.75),-4.4))return;fieldPlots++;applyField();updateHUD();playSound('build');const p=plots2[fieldPlots-1];toast(`Field plot ${fieldPlots}/18 unlocked! 2 crops per plot`);floatText('New plot!','#18b968',p.x,GROUND+1.1,p.z);save();}
+function buyPen(h){const n=penN[h];if(n>=3||!spend(PENC[h][n-1],wx(7),h==='coop'?4:-4))return;penN[h]++;rebuildPens();updateHUD();playSound('build');toast(`New ${h==='coop'?'chicken coop':'cow barn'} built! Room for ${PER[h==='coop'?'chicken':'cow']} more`);save();}
+function renderAnimalTab(){const l=$('animalList');l.innerHTML='';const br=bridgeBuilt,sp=mode==='rush'?RUSH_SPEED:1;
+  const mk=(t,c,d,dis,fn)=>{const b=document.createElement('button');b.className='buildCard';b.disabled=dis;b.innerHTML=`<div class="buildTop"><span class="buildName">${t}</span><span class="buildCost">${c}</span></div><div class="buildDesc">${d}</div>`;b.addEventListener('click',fn);l.appendChild(b);};
+  const sd=(name,right,left,time,note,dis,fn,sel)=>{const b=document.createElement('button');b.className='seedCard'+(sel?' selected':'')+(dis?' locked':'');b.disabled=dis;b.innerHTML=`<div class="seedTop"><span class="seedName">${name}</span><span class="earn">${right}</span></div><div class="seedBottom"><span class="cost">${left}</span><span class="time">${time}</span></div>${note?`<div class="unlock">${note}</div>`:''}`;b.addEventListener('click',fn);l.appendChild(b);};
+  if(!br)mk('Build bridge 🌉',`-${BRIDGE_COST} 🪙`,`Needs house level ${BRIDGE_LEVEL} · opens the Animal Island`,houseLevel<BRIDGE_LEVEL||money<BRIDGE_COST,buyBridge);
+  for(const k of ['wheat','corn']){const c=crops[k],off=!br||houseLevel<c.unlockLevel;sd(`${c.name} ${c.emoji} seeds`,'Reap → Silo +1',`Plant: -${c.cost} 🪙`,`⏱ ${Math.round(c.grow/sp)}s`,off?'🔒 Build the bridge first':'',off,()=>{selectedCrop=k;updateHUD();playSound('select');toast(`${c.name} selected`);},selectedCrop===k);}
+  for(const [k,A] of Object.entries(ANIMAL)){const used=animals.filter(a=>a.type===k).length,P=crops[A.prod],full=used>=cap(k);sd(`${A.name} ${A.emoji}`,`${P.name} ${P.emoji} +${P.sell}`,`Buy: -${A.cost} 🪙`,`⏱ ${Math.round(A.time/sp)}s`,!br?'🔒 Build the bridge first':full?'Pens full — buy another pen':`${used}/${cap(k)} · eats 1 ${crops[A.feed].name} ${crops[A.feed].emoji}`,!br||full||money<A.cost,()=>buyAnimal(k));}
+  mk('Expand field 🌾',fieldPlots>=18?'MAX':'-150 🪙',`Plot ${Math.min(fieldPlots+1,18)}/18 · you own ${fieldPlots} · 2 crops per plot`,!br||fieldPlots>=18||money<150,buyField);
+  for(const h of ['coop','barn']){const n=penN[h],nm=h==='coop'?'chicken coop 🐔':'cow barn 🐄',pc=PER[h==='coop'?'chicken':'cow'];mk(`Buy ${nm}`,n>=3?'MAX':`-${PENC[h][n-1]} 🪙`,`Pens ${n}/3 · holds ${pc} each`,!br||n>=3||money<PENC[h][n-1],()=>buyPen(h));}
+  mk(siloLv>=5?'Silo MAX':`Upgrade Silo 🏠 Lv.${siloLv}→${siloLv+1}`,siloLv>=5?'':`-${SILO_C[siloLv]} 🪙`,`Stores ${siloCap()}${siloLv<5?` → ${siloCap()+10}`:''} of each grain`,!br||siloLv>=5||money<SILO_C[siloLv],buySiloUp);
+  const tip=document.createElement('div');tip.className='buildDesc';tip.style.cssText='padding:7px 4px;line-height:1.6';tip.textContent='Plant wheat/corn in the Field → press Reap to store it in the Silo → tap an animal to feed it (1 grain per meal) → tap its bubble to collect.';l.appendChild(tip);}
+
+// ===== v7: bot difficulty, play history, extra sales debuff =====
+const BOTS={easy:[['Mia',14,.7],['Leo',11,.55],['Zoe',8,.4]],normal:[['Mia',22,.8],['Leo',17,.62],['Zoe',12,.45]],hard:[['Mia',34,.92],['Leo',28,.8],['Zoe',22,.7]]};
+// ===== Online Rush: rooms + lobby (WebRTC through PeerJS; no accounts, no backend) =====
+let net=null;
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const genCode=()=>Array.from({length:5},()=>'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[Math.floor(Math.random()*32)]).join('');
+const bcast=d=>{if(net&&net.host)for(const c of net.conns)if(c.open)c.send(d);};
+function uniq(n){let x=n,i=2;while(net.players.includes(x))x=`${n} ${i++}`;return x;}
+function closeNet(){try{net&&net.peer&&net.peer.destroy();}catch(e){}net=null;onlineOthers=null;}
+function setRemote(n,d){if(!rush)return;const b=rush.bots.find(x=>x.n===n);if(b){b.sold=d.sold;b.correct=d.correct;}}
+function netSend(){if(!net||!net.started||!rush)return;const d={t:'s',sold:Math.round(stats.sold),correct:stats.correct};if(net.host)bcast({...d,n:me});else if(net.conn&&net.conn.open)net.conn.send(d);}
+function showOnline(msg){const m=$('menuBody');$('menu').classList.add('open');m.innerHTML=`<h2>🌐 Online Rush</h2><p class="nm">Play the 16-minute Rush with friends (2–4 players). One player creates a room and shares the code.</p><button class="mbtn" id="oCreate">Create room</button><p class="nm" style="margin-top:12px">Have a code? <input id="oCode" maxlength="5" placeholder="ABCDE" style="text-transform:uppercase;width:90px;font:inherit;padding:5px"> <button class="mbtn alt" id="oJoin">Join room</button></p><p class="nm" id="oMsg">${msg||(window.Peer?'':'Online play is not available here (the connection library is blocked).')}</p><button class="mbtn alt" id="oBack">Back</button>`;
+  $('oBack').onclick=()=>showMenu('home');if(!window.Peer)return;$('oCreate').onclick=hostRoom;$('oJoin').onclick=()=>joinRoom($('oCode').value.trim().toUpperCase());}
+function showLobby(msg){if(!net)return;const m=$('menuBody'),host=net.host;$('menu').classList.add('open');m.innerHTML=`<h2>🌐 Lobby</h2><p class="nm">Room code <b style="font-size:28px;letter-spacing:5px;color:#2085c7">${net.code}</b></p>${tbl(['#','Player'],net.players.map((n,i)=>[i+1,esc(n)+(i===0?' 👑':'')+(n===me?' (you)':'')]))}<p class="nm">${msg||(host?(net.players.length<2?'Waiting for friends to join… share the code!':'Ready when you are!'):'Waiting for the host to start…')}</p>${host?`<button class="mbtn" id="lobStart" ${net.players.length<2?'disabled':''}>Start game</button> `:''}<button class="mbtn alt" id="lobLeave">Leave</button>`;
+  $('lobLeave').onclick=()=>{closeNet();showMenu('home');};if(host)$('lobStart').onclick=()=>{net.started=true;bcast({t:'start',players:net.players});startOnline();};}
+function hostRoom(){const code=genCode(),peer=new Peer('minifarm-'+code);net={host:true,code,peer,conns:[],players:[me],started:false};
+  peer.on('open',()=>showLobby());peer.on('error',e=>{if(e.type==='unavailable-id'){closeNet();hostRoom();}else{closeNet();showOnline(`Connection problem (${e.type}). Try again.`);}});
+  peer.on('connection',c=>{c.on('data',d=>hostData(c,d));c.on('close',()=>{if(!net)return;const i=net.conns.indexOf(c);if(i>=0){net.conns.splice(i,1);if(!net.started){net.players=net.players.filter(n=>n!==c.pname);bcast({t:'lobby',players:net.players});showLobby();}}});});}
+function hostData(c,d){if(d.t==='hello'){if(net.started||net.players.length>=4){c.send({t:'full'});return;}c.pname=uniq(String(d.name||'Player').slice(0,12));net.conns.push(c);net.players.push(c.pname);c.send({t:'welcome',name:c.pname});bcast({t:'lobby',players:net.players});showLobby();}
+  else if(d.t==='s'&&c.pname){setRemote(c.pname,d);for(const o of net.conns)if(o!==c&&o.open)o.send({t:'s',n:c.pname,sold:d.sold,correct:d.correct});}}
+function joinRoom(code){if(code.length!==5){showOnline('Enter the 5-character room code.');return;}const peer=new Peer();net={host:false,code,peer,players:[],started:false};const mine=net;
+  const fail=t=>{if(net!==mine)return;closeNet();showOnline(t);};setTimeout(()=>{if(net===mine&&!mine.welcomed)fail('Room not found or the connection timed out.');},9000);
+  peer.on('error',e=>fail(e.type==='peer-unavailable'?'Room not found. Check the code.':`Connection problem (${e.type}).`));
+  peer.on('open',()=>{const c=peer.connect('minifarm-'+code,{reliable:true});mine.conn=c;c.on('open',()=>c.send({t:'hello',name:me}));c.on('data',d=>guestData(d));c.on('close',()=>{if(net!==mine||mine.over)return;if(!mine.started){fail('The host closed the room.');}else toast('The host left the match — scores stop updating.');});});}
+function guestData(d){if(!net||net.host)return;if(d.t==='welcome'){net.welcomed=true;me=d.name;}else if(d.t==='full'){const m=net;closeNet();showOnline('That room is full or already started.');}else if(d.t==='lobby'){net.players=d.players;showLobby();}else if(d.t==='start'){net.players=d.players;net.started=true;startOnline();}else if(d.t==='s')setRemote(d.n,d);}
+function startOnline(){onlineOthers=net.players.filter(n=>n!==me);resetWorld();begin('rush');}
+// ===== v8: prettier animals / buildings / island decor + new sound effects =====
+const blob=(g,x,y,z,sx,sy,sz,m,seg=8)=>{const o=mesh(new THREE.SphereGeometry(1,seg,Math.max(5,seg-2)),m,g,x,y,z);o.scale.set(sx,sy,sz);return o;};
+function makeChicken2(){const g=new THREE.Group(),w=mat('#fffaf0'),w2=mat('#f0e5cc'),o=mat('#ff9d1c'),r=mat('#e83a3a'),k=mat('#222');
+  blob(g,0,.32,0,.2,.19,.27,w);blob(g,0,.35,.13,.16,.14,.13,mat('#ffffff'));
+  for(const s of [-1,1]){const wg=blob(g,s*.185,.34,-.02,.05,.13,.2,w2);wg.rotation.z=-s*.25;}
+  for(const a of [-.3,0,.3]){const t=blob(g,a*.12,.46,-.27,.05,.15,.07,a?w2:w);t.rotation.x=-.6;t.rotation.z=a;}
+  blob(g,0,.53,.19,.115,.115,.115,w);cone(g,0,.52,.31,.04,.1,o,4).rotation.x=Math.PI/2;
+  for(const x of [-.045,0,.045])blob(g,x,.65-Math.abs(x),.2,.028,.04,.04,r,6);blob(g,0,.47,.29,.025,.04,.025,r,6);
+  for(const s of [-1,1]){blob(g,s*.07,.55,.27,.018,.018,.018,k,5);box(g,s*.07,.1,0,.025,.2,.025,o);box(g,s*.07,.01,.03,.08,.02,.1,o);}
+  g.scale.setScalar(1.35);return g;}
+function makeCow2(){const g=new THREE.Group(),w=mat('#f7f4ee'),k=mat('#2f3338'),p=mat('#f4b6b0'),h=mat('#4a3b34');
+  box(g,0,.78,0,.62,.55,1.15,w);
+  for(let i=0;i<3;i++){const s=i%2?-1:1;box(g,s*.32,.68+Math.random()*.2,(Math.random()-.5)*.8,.02,.2+Math.random()*.15,.28+Math.random()*.2,k);}
+  box(g,0,1.06,-.1+(Math.random()-.5)*.3,.3,.02,.35,k);
+  box(g,0,.98,.62,.34,.4,.3,w);box(g,0,.94,.82,.3,.22,.14,p);
+  for(const s of [-1,1]){blob(g,s*.07,.93,.9,.025,.03,.02,k,5);blob(g,s*.15,1.08,.79,.035,.04,.03,k,6);box(g,s*.24,1.1,.64,.14,.05,.1,w);cone(g,s*.12,1.22,.62,.04,.12,mat('#eadfb8'),5);}
+  blob(g,0,.55,-.3,.12,.1,.12,p,7);
+  for(const [x,z] of [[-.2,.4],[.2,.4],[-.2,-.4],[.2,-.4]]){box(g,x,.27,z,.14,.5,.14,w);box(g,x,.03,z,.15,.06,.15,h);}
+  cylinder(g,0,.78,-.62,.025,.025,.5,k,5).rotation.x=.25;blob(g,0,.5,-.68,.06,.1,.06,k,6);blob(g,0,.8,.52,.05,.05,.05,mat('#e8c23a'),6);return g;}
+MODEL.chicken=makeChicken2;MODEL.cow=makeCow2;
+function gable(g,w,d,h,y,roofM,wallM){const L=Math.hypot(w/2,h)+.12,a=Math.atan2(h,w/2);for(const s of [-1,1]){const r=box(g,s*w/4,y+h/2,0,L,.1,d+.3,roofM);r.rotation.z=-s*a;}const sh=new THREE.Shape();sh.moveTo(-w/2,0);sh.lineTo(w/2,0);sh.lineTo(0,h);const gm=new THREE.ShapeGeometry(sh),wm=wallM.clone();wm.side=THREE.DoubleSide;for(const z of [-d/2,d/2]){const t=new THREE.Mesh(gm,wm);t.position.set(0,y,z);t.castShadow=true;g.add(t);}}
+bRoof.visible=false;gable(barn,3.3,2.2,1.0,GROUND+1.8,mat('#6b3f2a'),mat('#d9443b'));
+for(const a of [.72,-.72])box(barn,0,GROUND+.6,1.16,.07,1.4,.03,mat('#7a2e28')).rotation.z=a;
+box(barn,0,GROUND+2.2,1.12,.55,.42,.04,mat('#fff'));box(barn,0,GROUND+2.2,1.14,.45,.32,.04,mat('#3a2a22'));
+cylinder(barn,0,GROUND+3.0,0,.025,.025,.5,mat('#333'),5);const vane=new THREE.Group();vane.position.set(0,GROUND+3.25,0);box(vane,0,0,0,.5,.04,.04,mat('#d4af37'));cone(vane,.28,0,0,.06,.14,mat('#d4af37'),4).rotation.z=-Math.PI/2;barn.add(vane);
+cRoof.visible=false;gable(coop,2.2,1.5,.6,GROUND+1.2,mat('#b5472f'),mat('#c98a4b'));
+box(coop,0,GROUND+.18,-1.1,.5,.05,.7,mat('#bd7b36')).rotation.x=.4;box(coop,1.2,GROUND+.5,0,.35,.5,.6,mat('#a8692e'));box(coop,1.2,GROUND+.82,0,.45,.05,.7,mat('#b5472f'));cylinder(coop,0,GROUND+.95,.76,.17,.17,.04,mat('#ffe9a8'),10).rotation.x=Math.PI/2;
+for(const [x,z] of [[1.3,.55],[1.3,-.25],[1.55,.15]]){blob(siloG,x,GROUND+.22,z,.3,.26,.28,mat('#d9c08a'),7);blob(siloG,x,GROUND+.46,z,.07,.06,.07,mat('#8b6b3a'),5);}
+for(const s of [-1,1])blob(scare,s*.09,GROUND+1.9,.22,.03,.03,.02,mat('#222'),5);
+cone(scare,0,GROUND+1.84,.27,.04,.14,mat('#ff8a1c'),4).rotation.x=Math.PI/2;box(scare,0,GROUND+1.74,.23,.2,.02,.02,mat('#333'));box(scare,.12,GROUND+1.2,.16,.2,.2,.02,mat('#3b6ea8'));cylinder(scare,0,GROUND+2.1,0,.3,.3,.06,mat('#c9372c'),12);
+{const crow=new THREE.Group();crow.position.set(.72,GROUND+1.62,0);blob(crow,0,.1,0,.1,.08,.14,mat('#222'),7);blob(crow,0,.2,.1,.06,.06,.06,mat('#222'),6);cone(crow,0,.19,.19,.02,.08,mat('#e8a21c'),4).rotation.x=Math.PI/2;scare.add(crow);}
+// grass tufts and flowers on the Animal Island
+{const blocked=(x,z)=>{for(const h of ['coop','barn'])for(const [a,b,c,d] of SLOT[h])if(x>a-1&&x<b+1&&z>c-1&&z<d+1)return true;return(x>-10&&x<-4&&z>-9&&z<.5)||(x>-13&&x<-9&&z>-7&&z<-3)||(x<-12&&Math.abs(z)<2.4)||(Math.abs(x+12.5)<1.8&&Math.abs(z-6)<1.8);};
+  const pts=[];for(let i=0;i<500&&pts.length<120;i++){const a=Math.random()*6.283,r=3+Math.random()*12.8,x=Math.cos(a)*r,z=Math.sin(a)*r;if(!blocked(x,z))pts.push([x,z]);}
+  const tg=new THREE.InstancedMesh(new THREE.ConeGeometry(.09,.38,4),mat('#4fbf5f'),pts.length*2),NF=Math.min(36,pts.length),fl=new THREE.InstancedMesh(new THREE.SphereGeometry(.09,6,5),mat('#ffffff'),NF),st=new THREE.InstancedMesh(new THREE.CylinderGeometry(.012,.012,.32,4),mat('#3f9f4f'),NF),D=new THREE.Object3D(),pal=['#ff6b8b','#ffd23f','#ffffff','#b48cff','#ff9d3f'];
+  pts.forEach(([x,z],i)=>{for(let j=0;j<2;j++){D.position.set(wx(x)+j*.12,GROUND+.17,z+j*.1);D.rotation.set((Math.random()-.5)*.4,Math.random()*3,(Math.random()-.5)*.4);D.scale.setScalar(.7+Math.random()*.8);D.updateMatrix();tg.setMatrixAt(i*2+j,D.matrix);}
+    if(i<NF){D.position.set(wx(x),GROUND+.16,z);D.rotation.set(0,0,0);D.scale.setScalar(1);D.updateMatrix();st.setMatrixAt(i,D.matrix);D.position.y=GROUND+.34;D.updateMatrix();fl.setMatrixAt(i,D.matrix);fl.setColorAt(i,new THREE.Color(pal[i%pal.length]));}});
+  for(const o of [tg,fl,st]){o.castShadow=false;scene.add(o);}}
+// New sound effects (chicken, cow, coins, grain, sickle, tick, win / lose) + mute button
+let muted=false,sfxReady=false,vaneRef=vane,lastAnimalSnd=0,lastTick=-1;const sx={};
+function initSfx(){if(sfxReady||!Tone||!audioReady)return;sfxReady=true;const T=Tone;
+  sx.cluck=new T.Synth({oscillator:{type:'sawtooth'},envelope:{attack:.003,decay:.06,sustain:0,release:.04}}).toDestination();sx.cluck.volume.value=-14;
+  sx.moo=new T.FMSynth({harmonicity:1.01,modulationIndex:5,oscillator:{type:'sawtooth'},envelope:{attack:.1,decay:.2,sustain:.7,release:.5}}).toDestination();sx.moo.volume.value=-9;
+  sx.noise=new T.NoiseSynth({noise:{type:'pink'},envelope:{attack:.004,decay:.14,sustain:0,release:.05}}).toDestination();sx.noise.volume.value=-16;
+  sx.whoosh=new T.NoiseSynth({noise:{type:'white'},envelope:{attack:.03,decay:.22,sustain:0,release:.1}}).toDestination();sx.whoosh.volume.value=-18;
+  sx.coin=new T.Synth({oscillator:{type:'square'},envelope:{attack:.002,decay:.09,sustain:.02,release:.15}}).toDestination();sx.coin.volume.value=-16;}
+function sfx(type,n){initSfx();if(!sfxReady)return;const t=Tone.now();try{
+  if(type==='cluck'){for(const [i,nn] of [['E6',0],['B5',.07],['E6',.16]].map(a=>[a[1],a[0]]))sx.cluck.triggerAttackRelease(nn,'64n',t+i);}
+  else if(type==='moo'){sx.moo.triggerAttack('A2',t);sx.moo.frequency.linearRampToValueAtTime(Tone.Frequency('E2').toFrequency(),t+.7);sx.moo.triggerRelease(t+.75);}
+  else if(type==='coin'){const k=Math.min(6,Math.max(2,n||3));for(let i=0;i<k;i++)sx.coin.triggerAttackRelease(i%2?'E7':'B6','32n',t+i*.065);sx.coin.triggerAttackRelease('E7','16n',t+k*.065);}
+  else if(type==='grain')sx.noise.triggerAttackRelease('16n',t);
+  else if(type==='whoosh')sx.whoosh.triggerAttackRelease('8n',t);
+  else if(type==='tick')synth.triggerAttackRelease('A6','64n',t);
+  else if(type==='win'){['C5','E5','G5','C6','E6','G6'].forEach((nn,i)=>chime.triggerAttackRelease(nn,'16n',t+i*.09));chime.triggerAttackRelease('C7','4n',t+.6);}
+  else if(type==='lose')['G3','Eb3','C3'].forEach((nn,i)=>errorSynth.triggerAttackRelease(nn,'8n',t+i*.16));
+}catch(e){}}
+const SFXT=new Set(['cluck','moo','coin','grain','whoosh','tick','win','lose']),_play0=playSound;
+playSound=function(type,n){if(muted)return;if(!SFXT.has(type)){_play0(type);return;}ensureAudio().then(ok=>{if(ok)sfx(type,n);});};
+$('muteBtn').addEventListener('click',()=>{muted=!muted;$('muteBtn').textContent=muted?'🔇 Muted':'🔊 Sound';try{if(Tone)Tone.Destination.mute=muted;}catch(e){}});
+function tickFx(dt,now){vaneRef.rotation.y=Math.sin(now*.7)*1.1;scare.rotation.z=Math.sin(now*1.3)*.035;}
+useBook();
+// Keep the canvas crisp and the HUD live.
+updateHUD();
+let lastTime=performance.now()/1000,waterTimer=0;
+function animate(){requestAnimationFrame(animate);const now=performance.now()/1000;const dt=Math.min(.05,Math.max(0,now-lastTime));lastTime=now;updateIsland2Frame(dt,now);controls.update();
+  const pos=waterGeo.attributes.position;for(let i=0;i<pos.count;i++){const x=waterBase[i*3],z=waterBase[i*3+2];pos.array[i*3+1]=waterBase[i*3+1]+Math.sin(x*.13+now*1.2)*.06+Math.cos(z*.16-now*.8)*.045+Math.sin((x+z)*.08+now)*.025;}pos.needsUpdate=true;if(Math.floor(now*12)%2===0)waterGeo.computeVertexNormals();
+  for(const t of trees){t.pivot.rotation.z=t.baseRot+Math.sin(now*.75+t.phase)*.035;t.pivot.rotation.x=Math.cos(now*.62+t.phase)*.022;}
+  const buff=buffEnd>now,broken=brokenEnd>now;
+  if(buff){robotRoot.rotation.y+=dt*4.2;robotRoot.position.x=-4.45+Math.sin(now*5)*.06;}else if(broken){robotRoot.rotation.y=Math.sin(now*22)*.1;robotRoot.position.x=-4.45+Math.sin(now*36)*.09;robotRoot.rotation.z=Math.sin(now*34)*.075;}else{robotRoot.position.x=-4.45;robotRoot.rotation.z=Math.sin(now*1.5)*.015;robotRoot.rotation.y=Math.sin(now*.65)*.05;}
+  robotRoot.position.y=0;signSprite.position.set(-4.45+(broken?Math.sin(now*36)*.09:buff?Math.sin(now*5)*.06:0),GROUND+3.05,.58);
+  if(Math.floor(now)!==lastSignSec){lastSignSec=Math.floor(now);if(broken){const remain=Math.max(0,Math.ceil(brokenEnd-now));updateRobotSign(`Broken! ${remain}s`,'broken');}else if(buff){updateRobotSign('Watering 💦','buff');}else{if(robotSignMode!=='quiz')updateRobotSign('QUIZ 🤖','quiz');}}
+  if(!broken&&robotRoot.userData.mood==='broken')robotRoot.userData.mood='idle';
+  if(!buff&&robotRoot.userData.mood==='happy')robotRoot.userData.mood='idle';
+  for(const plot of plots){
+    if(!plot.unlocked)continue;
+    for(const p of plot.slots){
+      if(!p.plant)continue;
+      if(!p.ripe){
+        const c=crops[p.crop];const isl2=p.plot.island===2;p.growth=Math.min(1,p.growth+dt/c.grow*((isl2?buff2End>now:buff)?1.5:1)*(isl2?1+.12*(UP.field-1):1)*(mode==='rush'?RUSH_SPEED:1)*(DEB[isl2?2:1].slow>now?.7:1)*(penaltyEnd>now?.6:1));p.plantAge+=dt;
+        const emergence=smooth01(0,.48,p.plantAge);
+        const growScale=.12+.88*Math.pow(p.growth,.68);
+        const pop=p.plantAge<.64?1+Math.sin((p.plantAge/.64)*Math.PI)*.20*(1-p.plantAge/.82):1;
+        p.plant.scale.setScalar(Math.max(.001,growScale*emergence*pop));
+        p.plant.position.y=GROUND+.045+.145*emergence+(p.plantAge<.5?Math.sin((p.plantAge/.5)*Math.PI)*.045:Math.sin(now*2+p.index)*.012);
+        p.barClock+=dt;if(p.barClock>.055){p.barClock=0;drawProgress(p);}
+        if(p.growth>=1){
+          p.ripe=true;p.matureAge=0;p.sprite.visible=false;
+          spawnCropReadyEffect(p);playSound('ready');
+          floatText(`${crops[p.crop].emoji} Ready!`,'#20c978',p.x,GROUND+1.8,p.z);
+        }
+      }
+      if(p.ripe){
+        p.matureAge+=dt;
+        const t=Math.min(1,p.matureAge/.68);
+        const pop=p.matureAge<.68?1+.28*Math.sin(t*Math.PI)*(1-.25*t):1+Math.sin(now*4+p.index)*.035;
+        p.plant.scale.setScalar(pop);
+        p.plant.position.y=GROUND+.19+(p.matureAge<.68?Math.sin(t*Math.PI)*.17:Math.sin(now*3.1+p.index)*.025);
+      }
+      animateCropParts(p,now);
+    }
+  }
+  updateParticles(dt,now);
+  for(let i=floaters.length-1;i>=0;i--){const f=floaters[i];f.life-=dt;const v=f.pos.clone();v.y+=(1-f.life/f.max)*.8;v.project(camera);f.el.style.left=((v.x*.5+.5)*innerWidth)+'px';f.el.style.top=((-v.y*.5+.5)*innerHeight)+'px';f.el.style.opacity=Math.max(0,f.life/f.max);f.el.style.transform=`translate(-50%,${-20-(1-f.life/f.max)*24}px) scale(${.95+(1-f.life/f.max)*.08})`;if(f.life<=0){f.el.remove();floaters.splice(i,1);}}
+  // Update countdown text less often without forcing a DOM rewrite each frame.
+  controls.enabled=true;renderer.render(scene,camera);
+}
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,2));});
+// Start rendering, then fade the loading panel after the first frame.
+animate();setTimeout(()=>{const loading=$('loading');loading.style.opacity='0';setTimeout(()=>loading.remove(),400);},700);
+</script>
+</body>
+</html>
